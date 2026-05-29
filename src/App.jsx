@@ -1,122 +1,215 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useRef, useState } from "react";
+import "./App.css";
+import { parseExcel } from "./utils/parseExcel";
+
+import Header from "./components/Header";
+import KPICards from "./components/KPICards";
+import Filters from "./components/Filters";
+import BrandChart from "./components/BrandChart";
+import StatusChart from "./components/StatusChart";
+import ProductChart from "./components/ProductChart";
+import DateChart from "./components/DateChart";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [data, setData] =
+    useState([]);
+
+  const [filteredData,
+    setFilteredData,
+  ] = useState([]);
+
+  const [filters,
+    setFilters,
+  ] = useState({
+    estado: "Todos",
+    marca: "Todas",
+    sede: "Todas",
+  });
+
+  const dashboardRef =
+    useRef();
+
+  const handleFile =
+    async (e) => {
+      const file =
+        e.target.files[0];
+
+      if (!file) return;
+
+      const json =
+        await parseExcel(
+          file
+        );
+
+      setData(json);
+      setFilteredData(
+        json
+      );
+    };
+
+  useEffect(() => {
+    let filtered =
+      [...data];
+
+    // Estado
+    if (
+      filters.estado !==
+      "Todos"
+    ) {
+      filtered =
+        filtered.filter(
+          (item) =>
+            String(
+              item.ESTADONOMB
+            )
+              .toUpperCase()
+              .trim() ===
+            filters.estado
+        );
+    }
+
+    // Marca
+    if (
+      filters.marca !==
+      "Todas"
+    ) {
+      filtered =
+        filtered.filter(
+          (item) =>
+            item.MARCA ===
+            filters.marca
+        );
+    }
+
+    // Sede
+    if (
+      filters.sede !==
+      "Todas"
+    ) {
+      filtered =
+        filtered.filter(
+          (item) =>
+            item.CCOSTO ===
+            filters.sede
+        );
+    }
+
+    setFilteredData(
+      filtered
+    );
+  }, [filters, data]);
+
+    const exportPDF = async () => {
+    const input = dashboardRef.current;
+
+    // Captura el contenido con html2canvas
+    const canvas = await html2canvas(input, {
+      scale: 2,
+      useCORS: true, // Evita problemas con imágenes externas si las hay
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    // Configuración del PDF en formato A4
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // Calcular la altura proporcional de la imagen en el PDF
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Primera página
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+
+    // Generar páginas adicionales si el contenido es más largo que un A4
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight; // Mueve la posición de renderizado hacia arriba
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+
+    // Obtener la fecha actual en formato YYYY-MM-DD
+    const hoy = new Date();
+    const fechaFormateada = hoy.toISOString().split('T')[0];
+
+    // Guardar el PDF con la fecha en el nombre
+    pdf.save(`reporte_contact_center_${fechaFormateada}.pdf`);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
 
-      <div className="ticks"></div>
+      <Header
+        handleFile={
+          handleFile
+        }
+        exportPDF={
+          exportPDF
+        }
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <main
+        className="dashboard"
+        ref={dashboardRef}
+      >
+        <KPICards
+          data={
+            filteredData
+          }
+        />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <Filters
+          filters={
+            filters
+          }
+          setFilters={
+            setFilters
+          }
+          data={data}
+        />
+
+        <div className="top-grid">
+          <BrandChart
+            data={
+              filteredData
+            }
+          />
+
+          <StatusChart
+            data={
+              filteredData
+            }
+          />
+        </div>
+
+        <ProductChart
+          data={
+            filteredData
+          }
+        />
+
+        <DateChart
+          data={
+            filteredData
+          }
+        />
+
+      </main>
+
+      <footer className="footer">
+        Dashboard Contact Center © 2025
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
