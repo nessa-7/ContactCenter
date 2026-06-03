@@ -98,6 +98,7 @@ export default function KPICards({
         "green",
     },
 
+    /** 
     {
       title:
         "Marcas",
@@ -108,6 +109,7 @@ export default function KPICards({
       className:
         "purple",
     },
+    */
   ];
 
   return (

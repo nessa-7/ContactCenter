@@ -78,7 +78,7 @@ export default function BrandChart({
             ),
 
           backgroundColor:
-            "#2563eb",
+            "#49f439",
 
           borderRadius:
             8,
@@ -88,27 +88,22 @@ export default function BrandChart({
 
   return (
     <div className="chart-card">
-      <h3>
-        Casos por
-        Marca
-      </h3>
+      <h3>Casos por Marca</h3>
 
-      <Bar
-        data={
-          chartData
-        }
-        options={{
-          responsive:
-            true,
-
-          plugins: {
-            legend: {
-              position:
-                "top",
+      <div className="chart-container">
+        <Bar
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 }

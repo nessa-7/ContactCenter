@@ -21,16 +21,21 @@ function App() {
     setFilteredData,
   ] = useState([]);
 
-  const [filters,
-    setFilters,
-  ] = useState({
+  const [filters, setFilters] = useState({
     estado: "Todos",
     marca: "Todas",
     sede: "Todas",
+    mes: "Todos",
   });
+
 
   const dashboardRef =
     useRef();
+  const kpiRef = useRef();
+  const filtersRef = useRef();
+  const chartsRef = useRef();
+  const productRef = useRef();
+  const dateRef = useRef();
 
   const handleFile =
     async (e) => {
@@ -97,56 +102,124 @@ function App() {
         );
     }
 
+
+    if (filters.mes !== "Todos") {
+      filtered = filtered.filter((item) => {
+        let fecha = item.FECHA;
+
+        if (!fecha) return false;
+
+        let date;
+
+        if (!isNaN(fecha)) {
+          date = new Date((fecha - 25569) * 86400 * 1000);
+        } else {
+          date = new Date(fecha);
+        }
+
+        return (
+          date.toLocaleString("es-CO", {
+            month: "long",
+          }).toLowerCase() ===
+          filters.mes.toLowerCase()
+        );
+      });
+    }
+
+  
     setFilteredData(
       filtered
     );
+
   }, [filters, data]);
 
-    const exportPDF = async () => {
-    const input = dashboardRef.current;
 
-    // Captura el contenido con html2canvas
-    const canvas = await html2canvas(input, {
+  
+
+
+const exportPDF = async () => {
+  const actions = document.querySelector(".header-actions");
+
+  if (actions) {
+    actions.style.display = "none";
+  }
+
+  const pdf = new jsPDF("p", "mm", "letter");
+
+  pdf.setFontSize(20);
+  pdf.text("Contact Center", 15, 15);
+
+  pdf.setFontSize(10);
+  pdf.text("Análisis de órdenes de servicio", 15, 22);
+
+  const fecha = new Date().toLocaleDateString("es-CO");
+  pdf.text(`Generado en: ${fecha}`, 15, 28);
+
+  const sections = [
+    kpiRef.current,
+    filtersRef.current,
+    chartsRef.current,
+    productRef.current,
+    dateRef.current,
+  ];
+
+  let currentY = 35;
+
+  for (const section of sections) {
+    const canvas = await html2canvas(section, {
       scale: 2,
-      useCORS: true, // Evita problemas con imágenes externas si las hay
+      useCORS: true,
     });
 
     const imgData = canvas.toDataURL("image/png");
 
-    // Configuración del PDF en formato A4
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const pdfWidth =
+      pdf.internal.pageSize.getWidth();
 
-    // Calcular la altura proporcional de la imagen en el PDF
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pdfHeight =
+      pdf.internal.pageSize.getHeight();
 
-    let heightLeft = imgHeight;
-    let position = 0;
+    const imgWidth = pdfWidth - 20;
 
-    // Primera página
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
+    const imgHeight =
+      (canvas.height * imgWidth) /
+      canvas.width;
 
-    // Generar páginas adicionales si el contenido es más largo que un A4
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight; // Mueve la posición de renderizado hacia arriba
+    // Si no cabe completo, nueva página
+    if (
+      currentY + imgHeight >
+      pdfHeight - 10
+    ) {
       pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      currentY = 10;
     }
 
-    // Obtener la fecha actual en formato YYYY-MM-DD
-    const hoy = new Date();
-    const fechaFormateada = hoy.toISOString().split('T')[0];
+    pdf.addImage(
+      imgData,
+      "PNG",
+      10,
+      currentY,
+      imgWidth,
+      imgHeight
+    );
 
-    // Guardar el PDF con la fecha en el nombre
-    pdf.save(`reporte_contact_center_${fechaFormateada}.pdf`);
-  };
+    currentY += imgHeight + 10;
+  }
+
+  if (actions) {
+    actions.style.display = "flex";
+  }
+
+  const fechaFormateada =
+    new Date().toISOString().split("T")[0];
+
+  pdf.save(
+    `reporte_contact_center_${fechaFormateada}.pdf`
+  );
+};
 
   return (
-    <div className="app">
+    <div className="app" >
 
       <Header
         handleFile={
@@ -157,51 +230,34 @@ function App() {
         }
       />
 
-      <main
-        className="dashboard"
-        ref={dashboardRef}
-      >
-        <KPICards
-          data={
-            filteredData
-          }
-        />
+      <main className="dashboard">
 
-        <Filters
-          filters={
-            filters
-          }
-          setFilters={
-            setFilters
-          }
-          data={data}
-        />
+        <div ref={kpiRef}>
+          <KPICards data={filteredData} />
+        </div>
 
-        <div className="top-grid">
-          <BrandChart
-            data={
-              filteredData
-            }
-          />
-
-          <StatusChart
-            data={
-              filteredData
-            }
+        <div ref={filtersRef}>
+          <Filters
+            filters={filters}
+            setFilters={setFilters}
+            data={data}
           />
         </div>
 
-        <ProductChart
-          data={
-            filteredData
-          }
-        />
+        <div ref={chartsRef}>
+          <div className="top-grid">
+            <BrandChart data={filteredData} />
+            <StatusChart data={filteredData} />
+          </div>
+        </div>
 
-        <DateChart
-          data={
-            filteredData
-          }
-        />
+        <div ref={productRef}>
+          <ProductChart data={filteredData} />
+        </div>
+
+        <div ref={dateRef}>
+          <DateChart data={filteredData} />
+        </div>
 
       </main>
 

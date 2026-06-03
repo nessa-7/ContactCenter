@@ -45,6 +45,8 @@ export default function Filters({
           "Todas",
         sede:
           "Todas",
+        mes:
+         "Todos",
       });
     };
 
@@ -159,6 +161,33 @@ export default function Filters({
                 </option>
               )
             )}
+          </select>
+        </div>
+
+        <div className="filter-item">
+          <label>Mes</label>
+
+          <select
+            name="mes"
+            value={filters.mes}
+            onChange={handleChange}
+          >
+            <option value="Todos">
+              Todos los meses
+            </option>
+
+            <option value="enero">Enero</option>
+            <option value="febrero">Febrero</option>
+            <option value="marzo">Marzo</option>
+            <option value="abril">Abril</option>
+            <option value="mayo">Mayo</option>
+            <option value="junio">Junio</option>
+            <option value="julio">Julio</option>
+            <option value="agosto">Agosto</option>
+            <option value="septiembre">Septiembre</option>
+            <option value="octubre">Octubre</option>
+            <option value="noviembre">Noviembre</option>
+            <option value="diciembre">Diciembre</option>
           </select>
         </div>
 

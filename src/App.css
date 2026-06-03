@@ -317,6 +317,7 @@ body {
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+  margin-top: 30px;
 }
 
 /* GRAFICAS */
@@ -351,6 +352,11 @@ body {
     );
 
   min-height: 520px;
+}
+
+.chart-container {
+  position: relative;
+  height: calc(100% - 70px);
 }
 
 .chart-card h3 {
@@ -397,4 +403,10 @@ body {
   .dashboard {
     padding: 20px;
   }
+}
+
+.product-chart {
+  position: relative;
+  height: 400px; /* O el alto que prefieras */
+  width: 100%;
 }
