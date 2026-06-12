@@ -1,4 +1,5 @@
 import { FiFilter } from "react-icons/fi";
+import "./Filters.css";
 
 export default function Filters({
   filters,

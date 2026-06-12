@@ -1,3 +1,5 @@
+import "./Header.css";
+
 import {
   FiUpload,
   FiDownload,

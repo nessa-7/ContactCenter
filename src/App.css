@@ -1,134 +1,12 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background: #eef2f8;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
-}
-
 .app {
   min-height: 100vh;
-}
-
-/* HEADER */
-
-.header {
-  background: linear-gradient(
-    90deg,
-    #1e3caa,
-    #1b2c7a
-  );
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 30px 50px;
-
-  color: white;
-
-  position: sticky;
-  top: 0;
-  z-index: 999;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo-box {
-  width: 75px;
-  height: 75px;
-
-  background: rgba(
-    255,
-    255,
-    255,
-    0.15
-  );
-
-  border-radius: 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 38px;
-}
-
-.header-left h1 {
-  font-size: 46px;
-  font-weight: bold;
-}
-
-.header-left p {
-  margin-top: 5px;
-  font-size: 18px;
-  opacity: 0.9;
-}
-
-.header-actions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.upload-btn {
-  background: white;
-  color: #333;
-
-  padding: 14px 22px;
-
-  border-radius: 14px;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  cursor: pointer;
-  font-weight: 600;
-
-  transition: 0.3s;
-}
-
-.upload-btn:hover {
-  transform: translateY(-2px);
-}
-
-.pdf-btn {
-  border: none;
-  background: #16a34a;
-  color: white;
-
-  padding: 14px 25px;
-
-  border-radius: 14px;
-
-  cursor: pointer;
-
-  font-size: 16px;
-  font-weight: 600;
-
-  transition: 0.3s;
-}
-
-.pdf-btn:hover {
-  transform: translateY(-2px);
+  
 }
 
 /* DASHBOARD */
 
 .dashboard {
   width: 100%;
-
-  max-width: 1800px;
-
   margin: auto;
 
   padding: 35px;
@@ -136,188 +14,28 @@ body {
   display: flex;
   flex-direction: column;
   gap: 25px;
+
+
+  max-width: 1400px;
+  margin-left: 280px;
+  margin-right: 0px;
 }
 
-/* KPI */
 
-.kpi-grid {
-  display: grid;
+.reportes {
+  width: 100%;
+  margin: auto;
 
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(300px, 1fr)
-    );
+  padding: 35px;
 
-  gap: 25px;
-}
-
-.kpi-card {
-  background: white;
-  border-radius: 24px;
-  padding: 30px;
-
-  display: flex;
-  align-items: center;
-  gap: 25px;
-
-  box-shadow:
-    0 8px 30px
-    rgba(
-      0,
-      0,
-      0,
-      0.08
-    );
-
-  transition: 0.3s;
-}
-
-.kpi-card:hover {
-  transform:
-    translateY(-4px);
-}
-
-.kpi-icon {
-  width: 90px;
-  height: 90px;
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 40px;
-}
-
-.blue {
-  background:
-    rgba(
-      59,
-      130,
-      246,
-      0.15
-    );
-  color: #2563eb;
-}
-
-.orange {
-  background:
-    rgba(
-      249,
-      115,
-      22,
-      0.15
-    );
-  color: #ea580c;
-}
-
-.green {
-  background:
-    rgba(
-      34,
-      197,
-      94,
-      0.15
-    );
-  color: #16a34a;
-}
-
-.purple {
-  background:
-    rgba(
-      168,
-      85,
-      247,
-      0.15
-    );
-  color: #9333ea;
-}
-
-.kpi-card h4 {
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.kpi-card h2 {
-  font-size: 42px;
-}
-
-.kpi-card p {
-  color: #777;
-}
-
-/* FILTROS */
-
-.filters-card {
-  background: white;
-  border-radius: 24px;
-  padding: 30px;
-
-  box-shadow:
-    0 8px 30px
-    rgba(
-      0,
-      0,
-      0,
-      0.08
-    );
-}
-
-.filter-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  margin-bottom: 25px;
-
-  color: #233876;
-}
-
-.filters-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(250px, 1fr)
-    );
-
-  gap: 20px;
-}
-
-.filter-item {
   display: flex;
   flex-direction: column;
-}
+  gap: 25px;
 
-.filter-item label {
-  margin-bottom: 10px;
-  font-weight: 600;
-}
 
-.filter-item select {
-  height: 55px;
-  border:
-    1px solid #ddd;
-  border-radius: 14px;
-  padding: 0 15px;
-  font-size: 15px;
-}
-
-.clear-btn {
-  border: none;
-  background: #2563eb;
-  color: white;
-
-  height: 55px;
-  border-radius: 14px;
-
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  margin-top: 30px;
+  max-width: 1400px;
+  margin-left: 280px;
+  margin-right: 0px;
 }
 
 /* GRAFICAS */
@@ -378,6 +96,7 @@ body {
   text-align: center;
   padding: 22px;
   margin-top: 30px;
+  margin-bottom: 0;
 }
 
 /* RESPONSIVE */

@@ -1,0 +1,41 @@
+.sidebar {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+
+  width: 250px;
+background: linear-gradient(
+    90deg,
+    #1e3caa,
+    #1b2c7a
+  );
+  padding: 20px;
+  color: white;
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+}
+
+.sidebar button {
+  width: 100%;
+  border: none;
+  padding: 14px;
+  margin-top: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.sidebar button.active {
+  background: #7f92bd;
+}
+
+.logo{
+  widht: 200px;
+  height: 200px;
+  align-self: center;
+  text-align: center;
+  justify-content: center;
+}

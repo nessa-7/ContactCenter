@@ -1,3 +1,5 @@
+import "./KPICards.css";
+
 import {
   FiClipboard,
   FiClock,
