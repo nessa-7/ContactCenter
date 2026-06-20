@@ -27,8 +27,21 @@ export const parseContactCenter = (file) => {
         );
       };
 
-      const baseCasos =
-        getSheet("Base_Casos");
+const baseCasos = getSheet(
+  "Base_Casos"
+).map((row) => ({
+  ...row,
+
+  diasResolucion:
+    Number(
+      row["Días desde ingreso"]
+    ) || 0,
+}));
+
+console.log(
+  "Primeros casos:",
+  baseCasos.slice(0, 5)
+);
 
 const campañasSheet =
   workbook.Sheets["Campañas"];

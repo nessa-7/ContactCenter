@@ -212,7 +212,7 @@ function ResponseChart({ data }) {
               return (
                 <Line
                   key={mes.key}
-                  type="linear"
+                  type="monotone"
                   dataKey={
                     mes.key
                   }

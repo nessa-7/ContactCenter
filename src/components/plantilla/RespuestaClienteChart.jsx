@@ -6,124 +6,106 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  Cell,
 } from "recharts";
 
 import "./Charts.css";
 
-function RespuestaClienteChart({
-  data,
-}) {
-  if (!data?.campañas)
-    return null;
+function RespuestaClienteChart({ data }) {
+  if (!data?.campañas) return null;
 
-  const respuestas =
-    data.campañas;
+  const respuestas = data.campañas;
 
-  const sinRespuesta =
-    respuestas.filter(
-      (x) =>
-        x.respuesta
-          ?.trim()
-          .toLowerCase() ===
-        "sin respuesta"
-    ).length;
+  const normalize = (r) =>
+    String(r || "")
+      .trim()
+      .toLowerCase();
 
-  const gestionProceso =
-    respuestas.filter(
-      (x) =>
-        x.respuesta
-          ?.trim()
-          .toLowerCase() ===
-        "gestion en proceso"
-    ).length;
+  const sinRespuesta = respuestas.filter((x) => {
+    const r = normalize(x.respuesta);
+    return r === "sin respuesta";
+  }).length;
 
-  const errorSistema =
-    respuestas.filter(
-      (x) =>
-        x.respuesta
-          ?.trim()
-          .toLowerCase()
-          .includes(
-            "error en el sistema"
-          )
-    ).length;
+  const gestionProceso = respuestas.filter((x) => {
+    const r = normalize(x.respuesta);
+    return r === "gestion en proceso";
+  }).length;
 
-  const respuestaPositiva =
-    respuestas.filter((x) => {
-      const r =
-        x.respuesta
-          ?.trim()
-          .toLowerCase();
+  const errorSistema = respuestas.filter((x) => {
+    const r = normalize(x.respuesta);
+    return r.includes("error en el sistema");
+  }).length;
 
-      return (
-        r &&
-        r !==
-          "sin respuesta" &&
-        r !==
-          "gestion en proceso" &&
-        !r.includes(
-          "error en el sistema"
-        )
-      );
-    }).length;
+  const noValidas = [
+    "sin respuesta",
+    "chat abierto",
+    "escribio nuevamente",
+    "escribió nuevamente",
+  ];
 
-  const respuestaNegativa = 0;
+  const clienteRespondio = respuestas.filter((x) => {
+    const r = normalize(x.respuesta);
 
-  const total = respuestas.length - 1;
+    if (!r) return false;
+    if (r.includes("error en el sistema")) return false;
+    if (noValidas.includes(r)) return false;
+
+    return true;
+  }).length;
 
   const chartData = [
     {
       tipo: "Total",
-      valor: total,
+      valor: respuestas.length,
+    },
+    {
+      tipo: "Respondió",
+      valor: clienteRespondio,
     },
     {
       tipo: "Sin respuesta",
       valor: sinRespuesta,
     },
     {
-      tipo:
-        "Gestión en proceso",
+      tipo: "En proceso",
       valor: gestionProceso,
     },
     {
-      tipo:
-        "Error sistema",
+      tipo: "Error sistema",
       valor: errorSistema,
     },
-    
   ];
 
   return (
     <div className="chart-card">
-      <h3>
-        Respuesta del Cliente a Campañas
-      </h3>
+      <h3>Respuesta del Cliente a Campañas</h3>
 
-      <ResponsiveContainer
-        width="100%"
-        height={420}
-      >
-        <BarChart
-          data={chartData}
-        >
+      <ResponsiveContainer width="100%" height={420}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
 
           <XAxis dataKey="tipo" />
-
-          <YAxis
-            allowDecimals={
-              false
-            }
-          />
-
+          <YAxis allowDecimals={false} />
           <Tooltip />
 
-          <Bar
-            dataKey="valor"
-            radius={[
-              6, 6, 0, 0,
-            ]}
-          />
+          <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
+            {chartData.map((entry, index) => (
+              <Cell
+                key={index}
+                fill={
+                  entry.tipo === "Respondió"
+                    ? "#22c55e"
+                    : entry.tipo === "Sin respuesta"
+                    ? "#ef4444"
+                    : entry.tipo === "En proceso"
+                    ? "#f59e0b"
+                    : entry.tipo === "Error sistema"
+                    ? "#6366f1"
+                    : "#94a3b8"
+                }
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

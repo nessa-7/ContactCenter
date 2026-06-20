@@ -9,55 +9,38 @@ import {
   MdHeadsetMic,
 } from "react-icons/md";
 
-export default function Header({
-  handleFile,
-  exportPDF,
-}) {
+export default function Header({ handleFile, exportPDF }) {
   return (
     <header className="header">
 
       <div className="header-left">
-
         <div>
           <h1>Control de Casos</h1>
-
-          <p>
-            Análisis de Plantilla de casos
-          </p>
+          <p>Análisis de Casos Ingresados por Contact Center</p>
         </div>
       </div>
 
-      <div className="header-left .header-actions">
+      <div className="header-actions">
 
         <label className="upload-btn">
-
           <FiUpload />
-
-          <span>
-            Seleccionar
-            archivo
-          </span>
+          <span>Seleccionar archivo</span>
 
           <input
             type="file"
             accept=".xlsx,.xls"
-            onChange={
-              handleFile
-            }
+            onChange={handleFile}
             hidden
           />
         </label>
 
-        <button
-          className="pdf-btn"
-          onClick={
-            exportPDF
-          }
-        >
+        <button className="pdf-btn" onClick={exportPDF}>
           <FiDownload />
-           Descargar PDF
+          Descargar PDF
         </button>
+
       </div>
+
     </header>
   );
 }

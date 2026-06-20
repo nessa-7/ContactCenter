@@ -10,71 +10,59 @@ import EnvioChart from "../components/plantilla/EnvioChart";
 import SummaryTable from "../components/plantilla/SummaryTable";
 import Header from "../components/plantilla/HeaderPlantilla";
 import RespuestaClienteChart from "../components/plantilla/RespuestaClienteChart";
+import CasosPorDiasChart from "../components/plantilla/CasosPorDiasChart";
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 import "../components/plantilla/Charts.css";
+import BrandReportChart from "../components/plantilla/BrandReportChart";
+import ProductDonutChart from "../components/plantilla/ProductDonutChart";
+import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
 
 function Reportes() {
   const [data, setData] = useState(null);
 
   const reportRef = useRef();
 
- const exportPDF = async () => {
+const exportPDF = async () => {
   try {
     if (!reportRef.current) return;
 
-    const actions = document.querySelector(
-      ".header-actions"
-    );
+    // 🔥 SOLO dentro del reporte (no global)
+    const actions =
+      reportRef.current.querySelector(".header-actions");
 
     if (actions) {
       actions.style.display = "none";
     }
 
-    const canvas = await html2canvas(
-      reportRef.current,
-      {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      }
-    );
+    const canvas = await html2canvas(reportRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
 
+    // 🔥 restaurar botones
     if (actions) {
       actions.style.display = "flex";
     }
 
-    const imgData =
-      canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF(
-      "p",
-      "mm",
-      "letter"
-    );
+    const pdf = new jsPDF("p", "mm", "letter");
 
-    const pdfWidth =
-      pdf.internal.pageSize.getWidth();
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    const pdfHeight =
-      pdf.internal.pageSize.getHeight();
-
-    // Márgenes reducidos
     const margin = 3;
 
-    const imgWidth =
-      pdfWidth - margin * 2;
-
-    const imgHeight =
-      (canvas.height * imgWidth) /
-      canvas.width;
+    const imgWidth = pdfWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     let heightLeft = imgHeight;
     let position = margin;
 
-    // Primera página
     pdf.addImage(
       imgData,
       "PNG",
@@ -84,15 +72,10 @@ function Reportes() {
       imgHeight
     );
 
-    heightLeft -=
-      pdfHeight - margin * 2;
+    heightLeft -= pdfHeight - margin * 2;
 
-    // Páginas adicionales si son necesarias
     while (heightLeft > 0) {
-      position =
-        heightLeft -
-        imgHeight +
-        margin;
+      position = heightLeft - imgHeight + margin;
 
       pdf.addPage();
 
@@ -105,23 +88,14 @@ function Reportes() {
         imgHeight
       );
 
-      heightLeft -=
-        pdfHeight -
-        margin * 2;
+      heightLeft -= pdfHeight - margin * 2;
     }
 
-    const fecha = new Date()
-      .toISOString()
-      .split("T")[0];
+    const fecha = new Date().toISOString().split("T")[0];
 
-    pdf.save(
-      `reporte_contact_center_${fecha}.pdf`
-    );
+    pdf.save(`reporte_contact_center_${fecha}.pdf`);
   } catch (error) {
-    console.error(
-      "Error generando PDF:",
-      error
-    );
+    console.error("Error generando PDF:", error);
   }
 };
 
@@ -149,23 +123,32 @@ function Reportes() {
       >
         {data && (
           <>
+            <div className="top-grid">
+              <CasosPorDiasChart data={data} />
+            </div>
+
+            <div className="top-grid">
+              <BrandReportChart data={data} />
+              <ProductDonutChart data={data} />
+            </div>
+
             <ContactKPICards data={data} />
 
             <div className="top-grid">
               <ResponseChart data={data} />
             </div>
 
+
             <div className="top-grid">
               <CampaignChart data={data} />
             </div>
-
-            
 
             <div className="top-grid">
               <RespuestaClienteChart
                 data={data}
               />
-              <EnvioChart data={data} />
+              <OrdenMarcaChart data={data} />
+              {/*<EnvioChart data={data} /> */}
             </div>
 
           </>

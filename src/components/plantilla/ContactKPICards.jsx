@@ -49,7 +49,7 @@ function ContactKPICards({
   const cards = [
     {
       title:
-        "Casos Ingresados",
+        "Total Casos Ingresados",
       value: casos,
     },
     {
