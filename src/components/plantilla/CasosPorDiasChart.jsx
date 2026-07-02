@@ -13,7 +13,18 @@ import {
 import "./Charts.css";
 import "./CasosPorDias.css";
 import "../manager/KPICards.css";
-import { FiCheckCircle, FiAlertTriangle, FiXCircle, FiClock } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiAlertTriangle,
+  FiXCircle,
+  FiClock,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiArrowUp,
+  FiArrowDown,
+  FiActivity,
+} from "react-icons/fi";
+
 
 function CasosPorDiasChart({
   data,
@@ -61,6 +72,42 @@ function CasosPorDiasChart({
   }));
 
   const totalOverall = chartData.reduce((s, d) => s + d.total, 0) || 1;
+
+  const casosCerradosConTiempo =
+    data.baseCasos.filter(
+      (c) =>
+        c.diasCierre !== null &&
+        c.diasCierre !== undefined &&
+        !isNaN(c.diasCierre)
+    );
+
+  const promedioResolucion =
+    casosCerradosConTiempo.length > 0
+      ? Math.round(
+        casosCerradosConTiempo.reduce(
+          (sum, c) => sum + c.diasCierre,
+          0
+        ) / casosCerradosConTiempo.length
+      )
+      : 0;
+
+  const menorTiempoResolucion =
+    casosCerradosConTiempo.length > 0
+      ? Math.min(
+        ...casosCerradosConTiempo.map(
+          (c) => c.diasCierre
+        )
+      )
+      : 0;
+
+  const mayorTiempoResolucion =
+    casosCerradosConTiempo.length > 0
+      ? Math.max(
+        ...casosCerradosConTiempo.map(
+          (c) => c.diasCierre
+        )
+      )
+      : 0;
 
   const getColor = (dia) => {
     const colorMap = {
@@ -136,8 +183,8 @@ function CasosPorDiasChart({
 
       {/* KPI row */}
       <div style={{ marginBottom: 30, marginTop: 15 }}>
-        <div className="kpi-grid">
-          <div className="kpi-card" style={{ padding: 14,  background: 'rgba(0, 255, 94, 0.11)', border: '1px solid rgba(34,197,94,0.3)' }}>
+        <div className="kpi-grid2">
+          <div className="kpi-card2" style={{ padding: 14, background: 'rgba(0, 255, 94, 0.11)', border: '1px solid rgba(34,197,94,0.3)' }}>
             <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(34, 197, 94, 0.4)', color: '#16a34a' }}>
               <FiCheckCircle />
             </div>
@@ -149,7 +196,7 @@ function CasosPorDiasChart({
             </div>
           </div>
 
-          <div className="kpi-card" style={{ padding: 14, background: 'rgba(250,204,21,0.11)', border: '1px solid rgba(250,204,21,0.3)' }}>
+          <div className="kpi-card2" style={{ padding: 14, background: 'rgba(250,204,21,0.11)', border: '1px solid rgba(250,204,21,0.3)' }}>
             <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(250, 204, 21, 0.41)', color: '#b45309' }}>
               <FiAlertTriangle />
             </div>
@@ -161,7 +208,7 @@ function CasosPorDiasChart({
             </div>
           </div>
 
-          <div className="kpi-card" style={{ padding: 14, background: 'rgba(239,68,68,0.11)', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <div className="kpi-card2" style={{ padding: 14, background: 'rgba(239,68,68,0.11)', border: '1px solid rgba(239, 68, 68, 0.21)' }}>
             <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(239, 68, 68, 0.34)', color: '#dc2626' }}>
               <FiXCircle />
             </div>
@@ -173,7 +220,7 @@ function CasosPorDiasChart({
             </div>
           </div>
 
-          <div className="kpi-card" style={{ padding: 14, background: 'rgba(156,163,175,0.11)', border: '1px solid rgba(156,163,175,0.3)' }}>
+          <div className="kpi-card2" style={{ padding: 14, background: 'rgba(156,163,175,0.11)', border: '1px solid rgba(156,163,175,0.3)' }}>
             <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(156, 163, 175, 0.35)', color: '#374151' }}>
               <FiClock />
             </div>
@@ -184,97 +231,212 @@ function CasosPorDiasChart({
               <p>Casos cerrados</p>
             </div>
           </div>
+
         </div>
       </div>
 
-      <ResponsiveContainer
-        width="100%"
-        height={450}
-      >
-        <BarChart
-          data={chartData}
-          margin={{
-            top: 30,
-            right: 20,
-            left: 20,
-            bottom: 40,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
 
-          <XAxis
-            dataKey="dia"
-            label={{
-              value:
-                "Días de Resolución",
-              position:
-                "insideBottom",
-              offset: -10,
+
+      <div className="chart-main-layout">
+
+        <div className="chart-area">
+
+          <ResponsiveContainer
+            width="100%"
+            height={450}
+          >
+
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 30,
+                right: 20,
+                left: 20,
+                bottom: 40,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis
+                dataKey="dia"
+                label={{
+                  value:
+                    "Días de Resolución",
+                  position:
+                    "insideBottom",
+                  offset: -10,
+                }}
+              />
+
+              <YAxis
+                allowDecimals={
+                  false
+                }
+                label={{
+                  value:
+                    "Cantidad de Casos",
+                  angle: -90,
+                  position:
+                    "insideLeft",
+                }}
+              />
+
+              <Tooltip content={CustomTooltip} />
+
+              <Bar dataKey="abierto" stackId="a" radius={[6, 6, 0, 0]}>
+                {chartData.map((entry, index) => (
+                  <Cell key={index} fill={getColor(entry.dia)} />
+                ))}
+                <LabelList dataKey="abierto" position="insideTop" style={{ fill: "#fffffff0", fontSize: 15, fontWeight: 700 }} />
+              </Bar>
+
+              <Bar dataKey="cerrado" stackId="a" radius={[6, 6, 0, 0]}>
+                {chartData.map((entry, index) => (
+                  <Cell key={index} fill="#b1b2b4" />
+                ))}
+                <LabelList dataKey="cerrado" position="insideTop" style={{ fill: "#2a2a2ac5", fontSize: 12, fontWeight: 700 }} />
+                <LabelList content={renderTopLabel} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+
+        </div>
+
+        <div className="side-kpis">
+
+          {/* Tiempo Promedio */}
+          <div
+            className="kpi-card2"
+            style={{
+              padding: 14,
+              background:
+                "rgba(59,130,246,0.11)",
+              border:
+                "1px solid rgba(59,130,246,0.3)",
             }}
-          />
+          >
+            <div
+              className="kpi-icon"
+              style={{
+                width: 56,
+                height: 56,
+                fontSize: 22,
+                background:
+                  "rgba(59,130,246,0.35)",
+                color: "#2563eb",
+              }}
+            >
+              <FiActivity />
+            </div>
 
-          <YAxis
-            allowDecimals={
-              false
-            }
-            label={{
-              value:
-                "Cantidad de Casos",
-              angle: -90,
-              position:
-                "insideLeft",
+            <div>
+              <h4>Tiempo Promedio</h4>
+
+              <h2>
+                {promedioResolucion}
+                <span
+                  style={{
+                    fontSize: 18,
+                    marginLeft: 4,
+                  }}
+                >
+                  días
+                </span>
+              </h2>
+
+              <p>
+                Promedio de Solución
+              </p>
+            </div>
+          </div>
+
+          {/* Menor Tiempo */}
+          <div
+            className="kpi-card2"
+            style={{
+              padding: 14,
+              background: "rgba(97, 57, 23, 0.11)",
+              border: "1px solid rgba(138, 68, 24, 0.3)",
             }}
-          />
+          >
+            <div
+              className="kpi-icon"
+              style={{
+                width: 56,
+                height: 56,
+                fontSize: 22,
+                background: "rgba(135, 56, 13, 0.28)",
+                color: "#5c330f",
+              }}
+            >
+              <FiTrendingUp />
+            </div>
 
-          <Tooltip content={CustomTooltip} />
+            <div>
+              <h4>Caso Menor Tiempo</h4>
 
-          <Bar dataKey="abierto" stackId="a" radius={[6, 6, 0, 0]}>
-            {chartData.map((entry, index) => (
-              <Cell key={index} fill={getColor(entry.dia)} />
-            ))}
-            <LabelList dataKey="abierto" position="insideTop" style={{ fill: "#fffffff0", fontSize: 15, fontWeight: 700}} />
-          </Bar>
+              <h2>
+                {menorTiempoResolucion}
+                <span
+                  style={{
+                    fontSize: 18,
+                    marginLeft: 4,
+                  }}
+                >
+                  días
+                </span>
+              </h2>
 
-          <Bar dataKey="cerrado" stackId="a" radius={[6, 6, 0, 0]}>
-            {chartData.map((entry, index) => (
-              <Cell key={index} fill="#b1b2b4" />
-            ))}
-            <LabelList dataKey="cerrado" position="insideTop" style={{ fill: "#2a2a2ac5", fontSize: 12, fontWeight: 700 }} />
-            <LabelList content={renderTopLabel} />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-
+              <p>Para la Solución</p>
+            </div>
+          </div>
 
 
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          justifyContent:
-            "center",
-          marginTop: "15px",
-          flexWrap: "wrap",
-        }}
-      >
-        {/*
-        <span>
-          🟢 1-10 días
-        </span>
+          {/* Mayor Tiempo */}
 
-        <span>
-          🟡 11-20 días
-        </span>
+          <div
+            className="kpi-card2"
+            style={{
+              padding: 14,
+              background: "rgba(165, 68, 239, 0.11)",
+              border: "1px solid rgba(154, 68, 239, 0.3)",
+            }}
+          >
+            <div
+              className="kpi-icon"
+              style={{
+                width: 56,
+                height: 56,
+                fontSize: 22,
+                background: "rgba(173, 68, 239, 0.35)",
+                color: "#9026dc",
+              }}
+            >
+              <FiTrendingDown />
+            </div>
 
-        <span>
-          🔴 &gt;20 días
-        </span>
+            <div>
+              <h4>Caso Mayor Tiempo</h4>
 
-        <span>
-          ⚫ Cerrados
-        </span>
-        */}
+              <h2>
+                {mayorTiempoResolucion}
+                <span
+                  style={{
+                    fontSize: 18,
+                    marginLeft: 4,
+                  }}
+                >
+                  días
+                </span>
+              </h2>
+
+              <p>Para la Solución</p>
+            </div>
+          </div>
+        </div>
       </div>
+
+
     </div>
   );
 }

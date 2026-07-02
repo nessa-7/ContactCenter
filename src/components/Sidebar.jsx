@@ -1,19 +1,19 @@
 import "./Sidebar.css";
 
-import logo from "../assets/servicioalcliente.png"; 
+import logo from "../assets/servicioalcliente.png";
 
 function Sidebar({ page, setPage }) {
   return (
     <aside className="sidebar">
-      
+
       <img src={logo} alt="Logo" className="logo" />
 
-      <button
+      {/* <button
         className={page === "dashboard" ? "active" : ""}
         onClick={() => setPage("dashboard")}
       >
         Dashboard
-      </button>
+      </button> */}
 
       <button
         className={page === "reportes" ? "active" : ""}

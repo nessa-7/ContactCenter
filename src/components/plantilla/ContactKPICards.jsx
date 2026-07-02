@@ -1,91 +1,115 @@
-import "./ContactKPICards.css";
+﻿import "./ContactKPICards.css";
+import {
+  FiPackage,
+  FiAlertTriangle,
+  FiCheckCircle,
+} from "react-icons/fi";
 
-function ContactKPICards({
-  data,
-}) {
+function ContactKPICards({ data }) {
   if (!data) return null;
 
   const casos =
-  data.baseCasos.filter(
+    data.baseCasos?.filter(
+      (x) =>
+        x["Fecha ingreso"] &&
+        x["Nombre cliente"] &&
+        x["Teléfono"]
+    ).length || 0;
+
+  const novedades = data.noCompletoFlujo || [];
+
+  const solucionadas = novedades.filter(
     (x) =>
-      x["Fecha ingreso"] &&
-      x["Nombre cliente"] &&
-      x["Teléfono"]
+      String(x.estado)
+        .trim()
+        .toLowerCase() ===
+      "solucionado"
   ).length;
 
-  const campañaHoy =
-    data.baseCasos?.filter(
-      (x) =>
-        String(
-          x["¿Campaña hoy?"]
-        ).toUpperCase() === "SI"
-    ).length || 0;
+  const pendientes =
+    novedades.length - solucionadas;
 
-  const ordenes =
-    data.baseCasos?.filter(
-      (x) =>
-        x[
-          "Orden de Servicio"
-        ]
-    ).length || 0;
-
-  const noCompleto =
-    data.noCompletoFlujo?.filter(
-      (x) =>
-        x.observacion ===
-        "No completo el flujo"
-    ).length || 0;
-
-  const cedulaErronea =
-    data.noCompletoFlujo?.filter(
-      (x) =>
-        x.observacion ===
-        "cedula erronea"
-    ).length || 0;
-
-  const fueraGarantia =
-    data.fueraGarantia?.length || 0;
-
-  const cards = [
-    {
-      title:
-        "Total Casos Ingresados",
-      value: casos,
-    },
-    {
-      title:
-        "Campaña Hoy",
-      value: campañaHoy,
-    },
-    {
-      title:
-        "No Completó Flujo",
-      value: noCompleto,
-    },
-    {
-      title:
-        "Cédula Errónea",
-      value: cedulaErronea,
-    },
-    {
-      title:
-        "Fuera Garantía",
-      value: fueraGarantia,
-    },
-  ];
+  const efectividad =
+    novedades.length > 0
+      ? (
+        (solucionadas /
+          novedades.length) *
+        100
+      ).toFixed(0)
+      : 0;
 
   return (
     <section className="contact-kpis">
-      {cards.map((card) => (
-        <div
-          key={card.title}
-          className="contact-card"
-        >
-          <h4>{card.title}</h4>
+      <div className="contact-card contact-card-primary">
+        <div className="card-header">
+          <div className="card-icon blue">
+            <FiPackage />
+          </div>
 
-          <h2>{card.value}</h2>
+          <div>
+            <p className="contact-card-primary-title">
+              Casos Ingresados
+            </p>
+
+            <p className="contact-card-primary-subtitle">
+              Órdenes registradas correctamente
+            </p>
+          </div>
         </div>
-      ))}
+
+        <h2 className="contact-card-primary-value">
+          {casos}
+        </h2>
+      </div>
+      {/*
+      <div className="contact-card novedades-card">
+        <div className="card-header">
+          <div className="card-icon orange">
+            <FiAlertTriangle />
+          </div>
+
+          <div>
+            <h3>Novedades</h3>
+            <p>Total de casos con novedad</p>
+          </div>
+        </div>
+
+        <div className="novedades-total">
+          {novedades.length}
+        </div>
+
+        <div className="novedades-info">
+          <div className="badge success">
+            <FiCheckCircle />
+            <span>Solucionadas</span>
+            <strong>{solucionadas}</strong>
+          </div>
+
+          
+        <div className="badge warning">
+          <FiAlertTriangle />
+          <span>Pendientes</span>
+          <strong>{pendientes}</strong>
+        </div> 
+        </div>
+
+        {/*
+      <div className="progress">
+        <div
+          className="progress-fill"
+          style={{
+            width: `${efectividad}%`,
+          }}
+        />
+      </div>
+
+      <p className="efectividad">
+        {efectividad}% de efectividad
+      </p> 
+
+      </div>
+*/}
+
     </section>
   );
 }

@@ -9,16 +9,23 @@
 .chart-card {
   background: #fff;
   border-radius: 18px;
-  padding: 24px;
+  padding: 35px;
   box-shadow: 0 4px 20px
     rgba(0, 0, 0, 0.08);
 }
 
 .chart-card h3 {
   margin-bottom: 20px;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #1e3a8a;
+}
+
+/* 🔥 NUEVO: Evita que Chart.js crezca infinitamente */
+.chart-container {
+  position: relative;
+  height: 320px; /* Define una altura fija idónea para la dona */
+  width: 100%;
 }
 
 .upload-section {
@@ -35,4 +42,98 @@
 
 .upload-section input {
   padding: 10px;
+}
+
+
+.month-filter{
+    width:200px;
+    height:58px;
+
+    padding:0 16px;
+    margin-right:30px;
+
+    border:1px solid #d1d5db;
+    border-radius:12px;
+
+    font-size:16px;
+    font-weight:600;
+
+    cursor:pointer;
+    outline:none;
+    justifiy-content:center;
+
+}
+
+.month-filter:hover {
+  border-color: #3b82f6;
+}
+
+.month-filter:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.month-filter option {
+  background: white;
+  color: #1f2937;
+}
+
+
+
+.chart-header {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
+.chart-headermiau {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
+.day-legend{
+    flex:1;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    gap:28px;
+
+    margin-top:18px;
+
+    font-size:14px;
+    font-weight:600;
+    color:#8c8e93;
+}
+
+.day-legend span{
+    white-space:nowrap;
+}
+
+.chart-total{
+    margin-top:8px;
+    display:flex;
+    align-items:end;
+    gap:10px;
+}
+
+.chart-total-number{
+    font-size:42px;
+    font-weight:700;
+    color:#1d4ed8;
+    line-height:1;
+}
+
+.chart-total-text{
+    color:#64748b;
+    font-size:17px;
+    margin-bottom:6px;
 }

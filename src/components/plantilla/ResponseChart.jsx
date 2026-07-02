@@ -11,16 +11,21 @@ import {
 
 import "./Charts.css";
 
+import Holidays from "date-holidays";
+
+
+
+import { useState } from "react";
+
 function ResponseChart({ data }) {
-  const dias = Array.from(
-    { length: 31 },
-    (_, i) => i + 1
-  );
 
   const meses = Array.from(
     { length: 12 },
     () => Array(31).fill(0)
   );
+
+  const [mesSeleccionado, setMesSeleccionado] =
+    useState("Todos");
 
   const excelDateToJSDate = (excelDate) => {
     const utcDate = new Date(
@@ -29,8 +34,8 @@ function ResponseChart({ data }) {
 
     return new Date(
       utcDate.getTime() +
-        utcDate.getTimezoneOffset() *
-          60000
+      utcDate.getTimezoneOffset() *
+      60000
     );
   };
 
@@ -66,27 +71,66 @@ function ResponseChart({ data }) {
     }
   );
 
-  const chartData = dias.map(
-    (dia, index) => ({
-      dia,
-      Enero: meses[0][index],
-      Febrero: meses[1][index],
-      Marzo: meses[2][index],
-      Abril: meses[3][index],
-      Mayo: meses[4][index],
-      Junio: meses[5][index],
-      Julio: meses[6][index],
-      Agosto: meses[7][index],
-      Septiembre:
-        meses[8][index],
-      Octubre:
-        meses[9][index],
-      Noviembre:
-        meses[10][index],
-      Diciembre:
-        meses[11][index],
-    })
+  const primerCaso = data.baseCasos.find(
+    (x) => x["Fecha ingreso"]
   );
+
+  let year = new Date().getFullYear();
+
+  if (primerCaso) {
+    let fecha = primerCaso["Fecha ingreso"];
+
+    if (!isNaN(fecha)) {
+      year = excelDateToJSDate(Number(fecha)).getFullYear();
+    } else {
+      year = new Date(fecha).getFullYear();
+    }
+  }
+
+  const mesesNumero = {
+    Enero: 0,
+    Febrero: 1,
+    Marzo: 2,
+    Abril: 3,
+    Mayo: 4,
+    Junio: 5,
+    Julio: 6,
+    Agosto: 7,
+    Septiembre: 8,
+    Octubre: 9,
+    Noviembre: 10,
+    Diciembre: 11,
+  };
+
+  const diasDelMes =
+    mesSeleccionado === "Todos"
+      ? 31
+      : new Date(
+        year,
+        mesesNumero[mesSeleccionado] + 1,
+        0
+      ).getDate();
+
+  const dias = Array.from(
+    { length: diasDelMes },
+    (_, i) => i + 1
+  );
+
+  const chartData = dias.map((dia, index) => ({
+    dia,
+    Enero: meses[0][index],
+    Febrero: meses[1][index],
+    Marzo: meses[2][index],
+    Abril: meses[3][index],
+    Mayo: meses[4][index],
+    Junio: meses[5][index],
+    Julio: meses[6][index],
+    Agosto: meses[7][index],
+    Septiembre: meses[8][index],
+    Octubre: meses[9][index],
+    Noviembre: meses[10][index],
+    Diciembre: meses[11][index],
+  }));
 
   const mesesConfig = [
     {
@@ -139,11 +183,135 @@ function ResponseChart({ data }) {
     },
   ];
 
+  const hd = new Holidays("CO");
+
+
+  const totalCasos = data.baseCasos.filter((item) => {
+    const fecha = item["Fecha ingreso"];
+    if (!fecha) return false;
+
+    let date;
+
+    if (!isNaN(fecha)) {
+      date = excelDateToJSDate(Number(fecha));
+    } else {
+      date = new Date(fecha);
+    }
+
+    if (isNaN(date.getTime())) return false;
+
+    if (mesSeleccionado === "Todos") {
+      return true;
+    }
+
+    return (
+      date.getMonth() ===
+      mesesNumero[mesSeleccionado]
+    );
+  }).length;
+
+  const CustomXAxisTick = ({
+    x,
+    y,
+    payload,
+  }) => {
+    if (mesSeleccionado === "Todos") {
+      return (
+        <text
+          x={x}
+          y={y + 15}
+          textAnchor="middle"
+          fill="#374151"
+        >
+          {payload.value}
+        </text>
+      );
+    }
+
+    const fecha = new Date(
+      year,
+      mesesNumero[mesSeleccionado],
+      payload.value
+    );
+
+    const esFinSemana =
+      fecha.getDay() === 0 ||
+      fecha.getDay() === 6;
+
+    const esFestivo =
+      hd.isHoliday(fecha);
+
+    return (
+      <text
+        x={x}
+        y={y + 15}
+        textAnchor="middle"
+        fill={
+          esFestivo
+            ? "#dc2626"
+            : esFinSemana
+              ? "#f59e0b"
+              : "#374151"
+        }
+        fontWeight={
+          esFestivo || esFinSemana
+            ? 700
+            : 400
+        }
+      >
+        {payload.value}
+      </text>
+    );
+  };
+
   return (
     <div className="chart-card">
-      <h3>
-        Casos Ingresados por Día
-      </h3>
+      <div className="chart-headermiau">
+        <div>
+          <h3>Casos Ingresados por Día</h3>
+
+          <div className="chart-total">
+            <span className="chart-total-number">
+              {totalCasos}
+            </span>
+
+            <span className="chart-total-text">
+              Casos ingresados
+            </span>
+          </div>
+        </div>
+
+        {mesSeleccionado !== "Todos" && (
+          <div className="day-legend">
+            <span>⚫ Día Hábil</span>
+            <span>🟠 Sábado/Domingo</span>
+            <span>🔴 Festivo</span>
+          </div>
+        )}
+
+        <select
+          className="month-filter"
+          value={mesSeleccionado}
+          onChange={(e) =>
+            setMesSeleccionado(e.target.value)
+          }
+        >
+          <option value="Todos">Todos</option>
+          <option value="Enero">Enero</option>
+          <option value="Febrero">Febrero</option>
+          <option value="Marzo">Marzo</option>
+          <option value="Abril">Abril</option>
+          <option value="Mayo">Mayo</option>
+          <option value="Junio">Junio</option>
+          <option value="Julio">Julio</option>
+          <option value="Agosto">Agosto</option>
+          <option value="Septiembre">Septiembre</option>
+          <option value="Octubre">Octubre</option>
+          <option value="Noviembre">Noviembre</option>
+          <option value="Diciembre">Diciembre</option>
+        </select>
+      </div>
+
 
       <ResponsiveContainer
         width="100%"
@@ -165,9 +333,7 @@ function ResponseChart({ data }) {
 
           <XAxis
             dataKey="dia"
-            tick={{
-              fontSize: 12,
-            }}
+            tick={<CustomXAxisTick />}
           />
 
           <YAxis
@@ -194,13 +360,18 @@ function ResponseChart({ data }) {
             }}
           />
 
-          {mesesConfig.map(
-            (mes) => {
+          {mesesConfig
+            .filter(
+              (mes) =>
+                mesSeleccionado === "Todos" ||
+                mes.key === mesSeleccionado
+            )
+            .map((mes) => {
               const tieneDatos =
                 chartData.some(
                   (item) =>
                     item[
-                      mes.key
+                    mes.key
                     ] > 0
                 );
 
@@ -231,7 +402,7 @@ function ResponseChart({ data }) {
                 />
               );
             }
-          )}
+            )}
         </LineChart>
       </ResponsiveContainer>
     </div>

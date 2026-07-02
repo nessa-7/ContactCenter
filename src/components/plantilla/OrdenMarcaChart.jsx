@@ -4,6 +4,7 @@ import {
   Cell,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
 import "./Charts.css";
@@ -55,11 +56,17 @@ function OrdenMarcaChart({ data }) {
             dataKey="value"
             label
           >
-            <Cell fill="#22c55e" />
-            <Cell fill="#ef4444" />
+            <Cell fill="#54de3f" />
+            <Cell fill="#ef4483" />
           </Pie>
 
           <Tooltip />
+
+          <Legend
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

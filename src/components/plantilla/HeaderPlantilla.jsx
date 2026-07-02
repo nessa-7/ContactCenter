@@ -9,7 +9,7 @@ import {
   MdHeadsetMic,
 } from "react-icons/md";
 
-export default function Header({ handleFile, exportPDF }) {
+export default function Header({ handleFile, exportPDF, showActions = true }) {
   return (
     <header className="header">
 
@@ -20,26 +20,28 @@ export default function Header({ handleFile, exportPDF }) {
         </div>
       </div>
 
-      <div className="header-actions">
+      {showActions && (
+        <div className="header-actions">
 
-        <label className="upload-btn">
-          <FiUpload />
-          <span>Seleccionar archivo</span>
+          <label className="upload-btn">
+            <FiUpload />
+            <span>Seleccionar archivo</span>
 
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFile}
-            hidden
-          />
-        </label>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFile}
+              hidden
+            />
+          </label>
 
-        <button className="pdf-btn" onClick={exportPDF}>
-          <FiDownload />
-          Descargar PDF
-        </button>
+          <button className="pdf-btn" onClick={exportPDF}>
+            <FiDownload />
+            Descargar PDF
+          </button>
 
-      </div>
+        </div>
+      )}
 
     </header>
   );

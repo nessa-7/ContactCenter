@@ -20,11 +20,12 @@ export default function BrandReportChart({ data }) {
   // Extrae de forma segura la base de casos del parser
   const casos = data?.baseCasos || [];
   const brandCount = {};
+  const brandCumplidos = {};
 
-  // Contabiliza los casos recorriendo la columna "Marca" o "MARCA"
+  // Contabiliza los casos totales y los cumplidos recorriendo la columna "Marca" o "MARCA"
   casos.forEach((item) => {
     const rawMarca = item.Marca || item.MARCA;
-    
+
     // Normaliza el texto para limpiar espacios en blanco
     const marca = rawMarca ? String(rawMarca).trim() : "";
 
@@ -33,7 +34,14 @@ export default function BrandReportChart({ data }) {
       return; // Salta esta iteración y no lo cuenta
     }
 
+    // Contabiliza casos totales
     brandCount[marca] = (brandCount[marca] || 0) + 1;
+
+    // Contabiliza casos cumplidos (con Fecha fin)
+    const fechaFin = item["Fecha fin"] || item["FECHA FIN"];
+    if (fechaFin && String(fechaFin).trim() !== "") {
+      brandCumplidos[marca] = (brandCumplidos[marca] || 0) + 1;
+    }
   });
 
   // Ordena de mayor a menor volumen de casos y toma las 15 principales
@@ -45,9 +53,18 @@ export default function BrandReportChart({ data }) {
     labels: sortedBrands.map((item) => item[0]),
     datasets: [
       {
-        label: "Cantidad de Casos",
-        data: sortedBrands.map((item) => item[1]),
-        backgroundColor: "#c1a3c3", 
+        label: "Casos Cumplidos",
+        data: sortedBrands.map((item) => {
+          const cumplidos = brandCumplidos[item[0]];
+          return cumplidos && cumplidos > 0 ? cumplidos : null;
+        }),
+        backgroundColor: "#24a9cb",
+        borderRadius: 6,
+      },
+      {
+        label: "Casos Pendientes",
+        data: sortedBrands.map((item) => item[1] - (brandCumplidos[item[0]] || 0)),
+        backgroundColor: "#c8b2ca",
         borderRadius: 6,
       },
     ],
@@ -71,7 +88,11 @@ export default function BrandReportChart({ data }) {
       },
     },
     scales: {
+      x: {
+        stacked: true,
+      },
       y: {
+        stacked: true,
         beginAtZero: true,
         title: {
           display: true,

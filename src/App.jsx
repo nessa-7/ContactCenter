@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar";
 
 function App() {
   const [page, setPage] =
-    useState("dashboard");
+    useState("reportes");
 
   return (
     <div className="layout">
@@ -28,7 +28,6 @@ function App() {
         )}
 
       </div>
-
     </div>
   );
 }

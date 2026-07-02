@@ -1,25 +1,149 @@
 .contact-kpis {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-bottom: 25px;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 30px;
 }
 
 .contact-card {
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 3px 12px
-    rgba(0, 0, 0, 0.08);
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #e8edf4;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .08);
+  transition: .25s;
 }
 
-.contact-card h4 {
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, .12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem;
+}
+
+.card-icon.blue {
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.card-icon.orange {
+  background: #fff4e5;
+  color: #f59e0b;
+}
+
+.contact-card-primary-title,
+.novedades-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.contact-card-primary-subtitle,
+.novedades-card p {
+  margin: 4px 0 0;
   color: #64748b;
-  margin-bottom: 10px;
+  font-size: .9rem;
 }
 
-.contact-card h2 {
-  font-size: 2rem;
-  color: #1e3caa;
+.contact-card-primary-value,
+.novedades-total {
+  margin-top: 28px;
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  line-height: 1;
+}
+
+.novedades-info {
+  margin-top: 24px;
+  display: flex;
+  gap: 14px;
+}
+
+.badge {
+  flex: 1;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.badge svg {
+  font-size: 1.2rem;
+}
+
+.badge span {
+  font-size: .85rem;
+  color: #64748b;
+}
+
+.badge strong {
+  font-size: 1.5rem;
+}
+
+.success {
+  background: #ecfdf5;
+}
+
+.success svg,
+.success strong {
+  color: #16a34a;
+}
+
+.warning {
+  background: #fff7ed;
+}
+
+.warning svg,
+.warning strong {
+  color: #ea580c;
+}
+
+.progress {
+  margin-top: 22px;
+  height: 8px;
+  border-radius: 50px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 50px;
+  transition: width .4s;
+}
+
+.efectividad {
+  margin-top: 10px;
+  text-align: right;
+  font-size: .9rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+@media (max-width:900px) {
+  .contact-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .novedades-info {
+    flex-direction: column;
+  }
 }
