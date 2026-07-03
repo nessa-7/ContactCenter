@@ -21,7 +21,15 @@ export const parseContactCenter = (file) => {
         const sheet =
           workbook.Sheets[name];
 
-        if (!sheet) return [];
+        if (!sheet) {
+          const allSheets = Object.keys(workbook.Sheets);
+          console.log(`❌ Hoja "${name}" no encontrada.`);
+          console.log("🔍 Todas las hojas disponibles:");
+          allSheets.forEach((sheetName, index) => {
+            console.log(`   ${index + 1}. "${sheetName}" (length: ${sheetName.length})`);
+          });
+          return [];
+        }
 
         return XLSX.utils.sheet_to_json(
           sheet,
@@ -62,14 +70,6 @@ export const parseContactCenter = (file) => {
             dias++;
 
 
-          } else {
-            console.log(
-              "❌ Excluido:",
-              fechaTexto,
-              esFestivo
-                ? hd.isHoliday(actual)
-                : "Fin de semana"
-            );
           }
 
           actual.setDate(
@@ -77,10 +77,7 @@ export const parseContactCenter = (file) => {
           );
         }
 
-        console.log(
-          "Total hábiles:",
-          dias
-        );
+        
 
         return dias;
       };
@@ -256,11 +253,51 @@ export const parseContactCenter = (file) => {
         }
       }
 
+      const encuesta = getSheet("Encuesta");
+      
+      // Si no encuentra "Encuesta", busca una hoja que contenga "encuesta" en el nombre
+      let finalEncuesta = encuesta;
+      if (encuesta.length === 0) {
+        console.log("🔍 Buscando hoja 'Encuesta' con búsqueda flexible...");
+        const allSheets = Object.keys(workbook.Sheets);
+        const encuestaSheet = allSheets.find(
+          (sheet) => sheet.toLowerCase().includes("encuesta")
+        );
+        if (encuestaSheet) {
+          console.log(`✅ Encontrada hoja: "${encuestaSheet}"`);
+          finalEncuesta = XLSX.utils.sheet_to_json(
+            workbook.Sheets[encuestaSheet],
+            { defval: "" }
+          );
+        } else {
+          console.log("❌ No se encontró hoja con 'encuesta' en el nombre");
+          console.log("🔍 DEBUG: Listando todas las hojas y su contenido:");
+          const allSheets = Object.keys(workbook.Sheets);
+          allSheets.forEach((sheetName) => {
+            const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+            console.log(`📄 Hoja: "${sheetName}" - Registros: ${data.length}`);
+            if (data.length > 0) {
+              const allColumns = Object.keys(data[0]);
+              console.log(`   Todas las columnas (${allColumns.length}):`, allColumns);
+              console.log(`   Primer registro:`, data[0]);
+            }
+          });
+        }
+      }
+      
+      console.log("📋 Encuesta cargada:", finalEncuesta);
+      console.log("📋 Número de registros:", finalEncuesta.length);
+      if (finalEncuesta.length > 0) {
+        console.log("📋 Primera fila:", finalEncuesta[0]);
+        console.log("📋 Columnas:", Object.keys(finalEncuesta[0]));
+      }
+
       resolve({
         baseCasos,
         campañas,
         noCompletoFlujo,
         fueraGarantia,
+        encuesta: finalEncuesta,
       });
     };
 

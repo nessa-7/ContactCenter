@@ -19,6 +19,7 @@ import "../components/plantilla/Charts.css";
 import BrandReportChart from "../components/plantilla/BrandReportChart";
 import ProductDonutChart from "../components/plantilla/ProductDonutChart";
 import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
+import SurveyChart from "../components/plantilla/SurveyChart";
 
 function Reportes() {
   const [data, setData] = useState(null);
@@ -309,6 +310,10 @@ function Reportes() {
 
             <div className="top-grid">
               <EnvioChart data={data} />
+            </div>
+
+            <div className="top-grid">
+              <SurveyChart data={data} />
             </div>
 
             {/*
