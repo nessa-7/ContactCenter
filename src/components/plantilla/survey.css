@@ -6,12 +6,14 @@
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   background: #f8fafc;
+  margin-top: 16px;
 }
 
 .survey-section-header {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin: 2px;
 }
 
 .survey-badge {

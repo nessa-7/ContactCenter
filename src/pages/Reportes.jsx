@@ -33,10 +33,12 @@ function Reportes() {
 
     setIsExporting(true);
 
+    let clonedHeader = null;
+let actions = null;
+
     try {
       // clonar el header principal y quitarle las acciones (botones)
       const originalHeader = document.querySelector(".header");
-      let clonedHeader = null;
 
       if (originalHeader && reportRef.current) {
         clonedHeader = originalHeader.cloneNode(true);
@@ -177,33 +179,27 @@ function Reportes() {
         }
 
         // insertar el header clonado al inicio del area a capturar
-        reportRef.current.insertAdjacentElement("afterbegin", clonedHeader);
+        const firstPage =
+          reportRef.current.querySelector(".pdf-page-1");
+
+        if (firstPage) {
+          firstPage.insertAdjacentElement(
+            "afterbegin",
+            clonedHeader
+          );
+        }
       }
 
       // SOLO dentro del reporte (no global)
-      const actions = reportRef.current.querySelector(".header-actions");
+       actions = reportRef.current.querySelector(".header-actions");
 
       if (actions) {
         actions.style.display = "none";
       }
 
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
-
-      // restaurar botones
-      if (actions) {
-        actions.style.display = "flex";
-      }
-
-      // retirar el header clonado si fue insertado
-      if (clonedHeader && clonedHeader.parentNode === reportRef.current) {
-        reportRef.current.removeChild(clonedHeader);
-      }
-
-      const imgData = canvas.toDataURL("image/png");
+      const pageElements = Array.from(
+        reportRef.current.querySelectorAll(".pdf-page")
+      );
 
       const pdf = new jsPDF("p", "mm", "letter");
 
@@ -211,26 +207,42 @@ function Reportes() {
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
       const margin = 3;
-
       const imgWidth = pdfWidth - margin * 2;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      let heightLeft = imgHeight;
-      let position = margin;
+      let pageIndex = 0;
 
-      pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+      for (const pageElement of pageElements) {
+        const canvas = await html2canvas(pageElement, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
 
-      heightLeft -= pdfHeight - margin * 2;
+        const imgData = canvas.toDataURL("image/png");
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + margin;
+        let heightLeft = imgHeight;
+        let position = margin;
 
-        pdf.addPage();
+        if (pageIndex > 0) {
+          pdf.addPage();
+        }
 
         pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
 
-        heightLeft -= pdfHeight - margin * 3;
+        heightLeft -= pdfHeight - margin * 2;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight + margin;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight - margin * 3;
+        }
+
+        pageIndex += 1;
       }
+
+
 
       // 🔥 NUEVO: Hacer que el nombre del archivo también incluya la hora exacta para evitar duplicados
       const ahoraNombre = new Date();
@@ -241,6 +253,14 @@ function Reportes() {
     } catch (error) {
       console.error("Error generando PDF:", error);
     } finally {
+      if (actions) {
+        actions.style.display = "flex";
+      }
+
+      // quitar el header temporal
+      if (clonedHeader?.parentNode) {
+        clonedHeader.parentNode.removeChild(clonedHeader);
+      }
       setIsExporting(false);
     }
   };
@@ -278,50 +298,37 @@ function Reportes() {
       >
         {data && (
           <>
+            <div className="pdf-page pdf-page-1">
+              <div className="top-grid">
+                <CasosPorDiasChart data={data} />
+              </div>
 
-            <div className="top-grid">
-              <CasosPorDiasChart data={data} />
+              <div className="top-grid">
+                <ResponseChart data={data} />
+              </div>
             </div>
 
-            {/* <ContactKPICards data={data} /> */}
+            <div className="pdf-page pdf-page-2">
+              <div className="top-grid">
+                <BrandReportChart data={data} />
+              </div>
 
-            <div className="top-grid">
-              <ResponseChart data={data} />
+              <div className="top-grid">
+                <OrdenMarcaChart data={data} />
+                <ProductDonutChart data={data} />
+              </div>
+
+              <div className="top-grid">
+                <EnvioChart data={data} />
+                <NovedadesChart data={data} />
+              </div>
             </div>
 
-
-
-            <div className="top-grid">
-
-              <BrandReportChart data={data} />
-
-
+            <div className="pdf-page pdf-page-3">
+              <div className="top-grid">
+                <SurveyChart data={data} />
+              </div>
             </div>
-
-            <div className="top-grid">
-              {/*<RespuestaClienteChart
-                data={data}
-              />*/}
-              <OrdenMarcaChart data={data} />
-              <ProductDonutChart data={data} />
-
-            </div>
-
-
-            <div className="top-grid">
-              <EnvioChart data={data} />
-            </div>
-
-            <div className="top-grid">
-              <SurveyChart data={data} />
-            </div>
-
-            {/*
-            <div className="top-grid">
-              <CampaignChart data={data} />
-            </div>
-            */}
-
           </>
         )}
       </main>
