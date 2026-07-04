@@ -117,18 +117,33 @@ export default function SurveyChart({ data }) {
     }));
   };
 
+  const getSiNoColor = (name) => {
+    const lowerName = String(name || "").trim().toLowerCase();
+    if (lowerName === "sí" || lowerName === "si" || lowerName.startsWith("s")) {
+      return "#39d856"; // color para Sí
+    }
+    return "#fd5a88"; // color para No
+  };
+
   const pregunta2Data = normalizarSiNo(contarRespuestas(pregunta2Key));
   const pregunta3Data = normalizarSiNo(contarRespuestas(pregunta3Key));
   const pregunta5Data = normalizarSiNo(contarRespuestas(pregunta5Key));
 
-  // Pregunta 6: Comentarios
+  const isCommentColumn = (col) =>
+    /coment|suger|recomend|observ|feedback|texto|mensaje|nota/i.test(col);
+
+  const comentarioKey = columnasKeys.find((col) => isCommentColumn(col));
+
+  // Pregunta de comentarios
   const comentarios = [];
-  data.encuesta.forEach((row) => {
-    const respuesta = row[preguntasColumnas[5]] || row[preguntasColumnas[4]];
-    if (respuesta && String(respuesta).trim() !== "") {
-      comentarios.push(String(respuesta).trim());
-    }
-  });
+  if (comentarioKey) {
+    data.encuesta.forEach((row) => {
+      const respuesta = row[comentarioKey];
+      if (respuesta && String(respuesta).trim() !== "") {
+        comentarios.push(String(respuesta).trim());
+      }
+    });
+  }
 
   const totalRespuestas = data.encuesta.length;
   const totalEncuestaEnviados = data.campañas
@@ -204,7 +219,9 @@ export default function SurveyChart({ data }) {
             </div>
           </div>
           <div className="survey-summary-note">
-            Se cuentan todas las filas de "Campañas" con tipo "Encuesta Satisfacción".
+            Se consideran todas las encuestas enviadas a clientes con casos resueltos, 
+            exceptuando aquellos en los que la marca informó que no aplicaba la garantía o 
+            cuando la solución fue gestionada de manera externa al proceso.
           </div>
         </div>
       </div>
@@ -219,7 +236,7 @@ export default function SurveyChart({ data }) {
                 <XAxis dataKey="name" angle={-20} textAnchor="end" height={80} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#24a9cb" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="#9759d5" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -246,7 +263,7 @@ export default function SurveyChart({ data }) {
                   {pregunta2Data.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={getSiNoColor(entry.name)}
                     />
                   ))}
                 </Pie>
@@ -284,7 +301,7 @@ export default function SurveyChart({ data }) {
                   {pregunta3Data.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={getSiNoColor(entry.name)}
                     />
                   ))}
                 </Pie>
@@ -313,7 +330,7 @@ export default function SurveyChart({ data }) {
                 <XAxis dataKey="name" angle={-20} textAnchor="end" height={80} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#39d856" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="#24a9cb" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -340,7 +357,7 @@ export default function SurveyChart({ data }) {
                   {pregunta5Data.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={getSiNoColor(entry.name)}
                     />
                   ))}
                 </Pie>
@@ -360,34 +377,42 @@ export default function SurveyChart({ data }) {
 
       </div>
 
-      {comentarios.length > 0 && (
-        <div className="survey-card">
-          <h3>
-            Comentarios, Sugerencias y Recomendaciones (
-            {comentarios.length})
-          </h3>
-          <div
-            className="survey-chart-container survey-comment-list"
-            style={{ maxHeight: "320px", overflowY: "auto" }}
-          >
-            <ul style={{ paddingLeft: "20px" }}>
-              {comentarios.map((comentario, index) => (
-                <li
-                  key={index}
-                  style={{
-                    marginBottom: "10px",
-                    padding: "10px",
-                    backgroundColor: "#f5f5f5",
-                    borderRadius: "4px",
-                  }}
-                >
-                  {comentario}
-                </li>
-              ))}
-            </ul>
-          </div>
+      <div className="survey-card">
+        <h3>
+          Comentarios, Sugerencias y Recomendaciones (
+          {comentarios.length})
+        </h3>
+        <div
+          className="survey-chart-container survey-comment-list"
+          style={{ maxHeight: "320px", overflowY: "auto" }}
+        >
+          {comentarioKey ? (
+            comentarios.length > 0 ? (
+              <ul style={{ paddingLeft: "20px" }}>
+                {comentarios.map((comentario, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginBottom: "10px",
+                      padding: "10px",
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {comentario}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="survey-no-comments">No hay comentarios registrados.</div>
+            )
+          ) : (
+            <div className="survey-no-comments">
+              No se encontró la columna de comentarios.
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
