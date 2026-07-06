@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   Legend,
   LabelList,
+  Cell,
 } from "recharts";
 
 import "./Charts.css";
@@ -50,7 +51,12 @@ function NovedadesChart({ data }) {
     { tipo: "PQRS", total: escalado, solucionados: escaladoSol, pendientes: Math.max(0, escalado - escaladoSol) },
   ];
 
-  const COLORS = ["#7fb7ff", "#ffb86b", "#8bd39e", "#ffd56b", "#f28b82"];
+  const COLORS = {
+    "No completó flujo": "#87dae8",
+    "Cédula errónea": "#b082d5",
+    "Cambio/Devolución": "#efd054",
+    PQRS: "#dda05f",
+  };
 
   return (
     <div className="chart-card">
@@ -70,8 +76,11 @@ function NovedadesChart({ data }) {
           <Tooltip />
           <Legend />
 
-          <Bar dataKey="pendientes" name="Pendientes" fill="#ec9cea" radius={[0, 18, 18, 0]} barSize={22}>
-            <LabelList dataKey="pendientes" position="insideLeft" formatter={(val) => val} fill="#db2bcf" />
+          <Bar dataKey="pendientes" name="Pendientes" radius={[0, 18, 18, 0]} barSize={22}>
+            {chartData.map((entry, index) => (
+              <Cell key={`pending-${index}`} fill={COLORS[entry.tipo] || "#ec9cea"} />
+            ))}
+            <LabelList dataKey="pendientes" position="insideLeft" formatter={(val) => val} fill="#5a545a" />
           </Bar>
           <Bar dataKey="solucionados" name="Solucionados" fill="#92e485" radius={[0, 18, 18, 0]} barSize={22}>
             <LabelList dataKey="solucionados" position="insideRight" formatter={(val) => val} fill="#0fa21e" />

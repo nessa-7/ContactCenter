@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -29,16 +30,89 @@ import {
 function CasosPorDiasChart({
   data,
 }) {
+  const [selectedSegment, setSelectedSegment] = useState(null);
+
   if (!data?.baseCasos)
     return null;
 
   const ranges = [
     { key: "1-10", min: 1, max: 10 },
     { key: "11-20", min: 11, max: 20 },
-    { key: ">20", min: 21, max: Infinity },
+    { key: "21-30", min: 21, max: 30 },
+    { key: ">30", min: 31, max: Infinity },
   ];
 
   const counts = {};
+
+  const normalizeText = (value) =>
+    String(value ?? "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
+
+  const getCaseValue = (caso, candidates) => {
+    const normalizedTargets = new Set(candidates.map(normalizeText));
+
+    for (const key of Object.keys(caso || {})) {
+      const normalizedKey = normalizeText(key);
+      if (normalizedTargets.has(normalizedKey)) {
+        const value = caso[key];
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+          return String(value).trim();
+        }
+      }
+    }
+
+    return "";
+  };
+
+  const formatDateValue = (value) => {
+    if (value === undefined || value === null || String(value).trim() === "") {
+      return "";
+    }
+
+    if (value instanceof Date) {
+      return value.toLocaleDateString("es-CO");
+    }
+
+    if (typeof value === "number") {
+      if (value > 59) {
+        const date = new Date((value - 25569) * 86400 * 1000);
+        return date.toLocaleDateString("es-CO");
+      }
+      return String(value);
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString("es-CO");
+    }
+
+    return String(value);
+  };
+
+  const hasFechaFin = (caso) =>
+    Object.keys(caso || {}).some(
+      (k) =>
+        /fech.*fin|fecha.*fin|fechafin|fecha_fin|fecha.*cierre|fechacierre/i.test(k) &&
+        String(caso[k] || "").toString().trim() !== ""
+    );
+
+  const getCasesForSegment = (dia, segmentType) => {
+    const range = ranges.find((r) => r.key === dia);
+    if (!range) return [];
+
+    return data.baseCasos.filter((caso) => {
+      const dias = Number(caso.diasResolucion) || 0;
+
+      if (!dias || dias < 1) return false;
+      if (dias < range.min || dias > range.max) return false;
+
+      const isClosed = hasFechaFin(caso);
+      return segmentType === "cerrado" ? isClosed : !isClosed;
+    });
+  };
 
   ranges.forEach((r) => {
     counts[r.key] = { abierto: 0, cerrado: 0 };
@@ -54,13 +128,7 @@ function CasosPorDiasChart({
 
     const key = range.key;
 
-    // Determine closed by presence of any 'fecha fin' field (handle variants)
-    const hasFechaFin = Object.keys(caso).some((k) =>
-      /fech.*fin|fecha.*fin|fechafin|fecha_fin|fecha.*cierre|fechacierre/i.test(k) &&
-      String(caso[k] || "").toString().trim() !== ""
-    );
-
-    if (hasFechaFin) counts[key].cerrado++;
+    if (hasFechaFin(caso)) counts[key].cerrado++;
     else counts[key].abierto++;
   });
 
@@ -113,11 +181,18 @@ function CasosPorDiasChart({
     const colorMap = {
       "1-10": "#19ee47",
       "11-20": "#efe22c",
-      ">20": "#ef4444",
+      "21-30": "#ef4444",
+      ">30": "#9ca3af",
     };
 
     return colorMap[dia] || "#4b5563";
   };
+
+  const selectedCases = selectedSegment
+    ? getCasesForSegment(selectedSegment.dia, selectedSegment.segmentType)
+    : [];
+
+  const closeModal = () => setSelectedSegment(null);
 
   const renderTopLabel = (props) => {
     const { x, y, index } = props;
@@ -176,6 +251,44 @@ function CasosPorDiasChart({
 
   return (
     <div className="chart-card">
+      {selectedSegment && (
+        <div className="case-details-overlay" onClick={closeModal}>
+          <div className="case-details-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="case-details-header">
+              <div>
+                <h3>
+                  {selectedSegment.dia} · {selectedSegment.segmentType === "abierto" ? "Abiertos" : "Cerrados"}
+                </h3>
+                <p>{selectedCases.length} caso(s) encontrados</p>
+              </div>
+              <button type="button" className="case-details-close" onClick={closeModal}>
+                ×
+              </button>
+            </div>
+
+            {selectedCases.length === 0 ? (
+              <p className="case-details-empty">No hay casos para este segmento.</p>
+            ) : (
+              <div className="case-details-list">
+                {selectedCases.map((caso, index) => (
+                  <div className="case-details-item" key={`${getCaseValue(caso, ["Id", "id", "Número", "numero"])}-${index}`}>
+                    <div className="case-details-name">
+                      {getCaseValue(caso, ["Nombre cliente", "Nombre Cliente", "Cliente", "nombre cliente", "Nombre", "nombre"]) || "Sin nombre"}
+                    </div>
+                    <div className="case-details-meta">
+                      <span><strong>Producto:</strong> {getCaseValue(caso, ["Producto", "producto", "Producto/Servicio", "Tipo de producto"]) || "Sin producto"}</span>
+                      <span><strong>Marca:</strong> {getCaseValue(caso, ["Marca", "marca", "MARCA"]) || "Sin marca"}</span>
+                      <span><strong>Estado:</strong> {getCaseValue(caso, ["Estado", "estado", "ESTADO", "Status", "status", "Estado del caso", "estadodelcaso"]) || "Sin estado"}</span>
+                      <span><strong>Días:</strong> {caso.diasResolucion ?? caso.diasCierre ?? "—"}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <h3>
         Casos por
         Días de Atención
@@ -214,8 +327,8 @@ function CasosPorDiasChart({
             </div>
 
             <div>
-              <h4>Críticos (&gt;20 días)</h4>
-              <h2>{counts[">20"].abierto}</h2>
+              <h4>Críticos (21-30 días)</h4>
+              <h2>{counts["21-30"].abierto}</h2>
               <p>Alto riesgo</p>
             </div>
           </div>
@@ -226,24 +339,25 @@ function CasosPorDiasChart({
             </div>
 
             <div>
-              <h4>Cerrados</h4>
-              <h2>{chartData.reduce((s, d) => s + d.cerrado, 0)}</h2>
-              <p>Casos cerrados</p>
+              <h4>Muy Críticos (&gt;30 días)</h4>
+              <h2>{counts[">30"].abierto}</h2>
+              <p>Riesgo extremo</p>
             </div>
           </div>
+
 
         </div>
       </div>
 
 
 
-      <div className="chart-main-layout">
+      <div className="chart-main-layout" style={{ alignItems: "stretch" }}>
 
-        <div className="chart-area">
+        <div className="chart-area" style={{ minHeight: 430 }}>
 
           <ResponsiveContainer
             width="100%"
-            height={450}
+            height="100%"
           >
 
             <BarChart
@@ -285,14 +399,26 @@ function CasosPorDiasChart({
 
               <Bar dataKey="abierto" stackId="a" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry, index) => (
-                  <Cell key={index} fill={getColor(entry.dia)} />
+                  <Cell
+                    key={index}
+                    fill={getColor(entry.dia)}
+                    cursor="pointer"
+                    onClick={() => setSelectedSegment({ dia: entry.dia, segmentType: "abierto" })}
+                    onDoubleClick={() => setSelectedSegment({ dia: entry.dia, segmentType: "abierto" })}
+                  />
                 ))}
                 <LabelList dataKey="abierto" position="insideTop" style={{ fill: "#fffffff0", fontSize: 15, fontWeight: 700 }} />
               </Bar>
 
               <Bar dataKey="cerrado" stackId="a" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry, index) => (
-                  <Cell key={index} fill="#b1b2b4" />
+                  <Cell
+                    key={index}
+                    fill="#bfdeff"
+                    cursor="pointer"
+                    onClick={() => setSelectedSegment({ dia: entry.dia, segmentType: "cerrado" })}
+                    onDoubleClick={() => setSelectedSegment({ dia: entry.dia, segmentType: "cerrado" })}
+                  />
                 ))}
                 <LabelList dataKey="cerrado" position="insideTop" style={{ fill: "#2a2a2ac5", fontSize: 12, fontWeight: 700 }} />
                 <LabelList content={renderTopLabel} />
@@ -303,6 +429,18 @@ function CasosPorDiasChart({
         </div>
 
         <div className="side-kpis">
+
+          <div className="kpi-card2" style={{ padding: 14, background: 'rgba(160, 220, 230, 0.23)', border: '1px solid rgba(117, 204, 222, 0.3)' }}>
+            <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(188, 224, 238, 0.56)', color: '#19d9ff' }}>
+              <FiClock />
+            </div>
+
+            <div>
+              <h4>Cerrados</h4>
+              <h2>{chartData.reduce((s, d) => s + d.cerrado, 0)}</h2>
+              <p>Casos cerrados</p>
+            </div>
+          </div>
 
           {/* Tiempo Promedio */}
           <div

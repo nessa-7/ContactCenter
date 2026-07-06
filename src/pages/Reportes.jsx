@@ -58,14 +58,14 @@ let actions = null;
 
         const h1 = clonedHeader.querySelector("h1");
         if (h1) {
-          h1.style.fontSize = "80px";
+          h1.style.fontSize = "50px";
           h1.style.fontWeight = "700";
           h1.style.margin = "0";
         }
 
         const p = clonedHeader.querySelector("p");
         if (p) {
-          p.style.fontSize = "35px";
+          p.style.fontSize = "20px";
           p.style.margin = "4px 0 0 0";
         }
 
@@ -151,9 +151,9 @@ let actions = null;
         const metaPeriodo = document.createElement("span");
         metaPeriodo.innerText = rangoCasos;
 
-        metaPeriodo.style.fontSize = "25px";
+        metaPeriodo.style.fontSize = "15px";
         metaPeriodo.style.color = "#565a61";
-        metaPeriodo.style.marginTop = "15px";
+        metaPeriodo.style.marginTop = "5px";
         metaPeriodo.style.fontWeight = "400";
 
         // 🔥 NUEVO: Crear el elemento contenedor para la metadata de descarga
@@ -161,9 +161,9 @@ let actions = null;
         metaDescarga.innerText = `Reporte generado el: ${fechaFormateada} a las ${horaFormateada}`;
 
         // 🔥 NUEVO: Estilos estéticos para el texto de la fecha
-        metaDescarga.style.fontSize = "22px";
+        metaDescarga.style.fontSize = "13px";
         metaDescarga.style.color = "#6b7280"; // Gris elegante (Tailwind gray-500)
-        metaDescarga.style.marginTop = "12px";
+        metaDescarga.style.marginTop = "3px";
         metaDescarga.style.fontWeight = "400";
         metaDescarga.style.display = "flex";
         headerLeft.style.flexDirection = "column";
