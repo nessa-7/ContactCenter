@@ -431,7 +431,7 @@ function CasosPorDiasChart({
         <div className="side-kpis">
 
           <div className="kpi-card2" style={{ padding: 14, background: 'rgba(160, 220, 230, 0.23)', border: '1px solid rgba(117, 204, 222, 0.3)' }}>
-            <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(188, 224, 238, 0.56)', color: '#19d9ff' }}>
+            <div className="kpi-icon" style={{ width: 56, height: 56, fontSize: 22, background: 'rgba(174, 243, 255, 0.81)', color: '#19d9ff' }}>
               <FiClock />
             </div>
 
@@ -448,9 +448,9 @@ function CasosPorDiasChart({
             style={{
               padding: 14,
               background:
-                "rgba(59,130,246,0.11)",
+                "rgba(246, 59, 230, 0.11)",
               border:
-                "1px solid rgba(59,130,246,0.3)",
+                "1px solid rgba(246, 59, 215, 0.3)",
             }}
           >
             <div
@@ -460,8 +460,8 @@ function CasosPorDiasChart({
                 height: 56,
                 fontSize: 22,
                 background:
-                  "rgba(59,130,246,0.35)",
-                color: "#2563eb",
+                  "rgba(246, 59, 227, 0.35)",
+                color: "#eb25c7",
               }}
             >
               <FiActivity />

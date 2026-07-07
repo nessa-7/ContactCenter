@@ -58,6 +58,52 @@ function NovedadesChart({ data }) {
     PQRS: "#dda05f",
   };
 
+  const darkenColor = (hex, amount = 0.18) => {
+    const normalized = hex.replace("#", "");
+    const color = normalized.length === 3
+      ? normalized.split("").map((char) => char + char).join("")
+      : normalized;
+
+    const value = parseInt(color, 16);
+    let r = (value >> 16) & 255;
+    let g = (value >> 8) & 255;
+    let b = value & 255;
+
+    const apply = (channel) => Math.max(0, Math.round(channel * (1 - amount)));
+
+    return `#${[r, g, b]
+      .map(apply)
+      .map((channel) => channel.toString(16).padStart(2, "0"))
+      .join("")}`;
+  };
+
+  const SOLVED_COLORS = Object.fromEntries(
+    Object.entries(COLORS).map(([tipo, color]) => [tipo, darkenColor(color)])
+  );
+
+  const renderBarLabel = ({ x, y, width, height, value, dataKey, payload }) => {
+    const entryType = payload?.tipo;
+    const baseColor = dataKey === "pendientes"
+      ? COLORS[entryType]
+      : SOLVED_COLORS[entryType];
+    const textColor = baseColor || (dataKey === "pendientes" ? "#2f2f2f7e" : "#26262698");
+    const isRight = dataKey === "solucionados";
+
+    return (
+      <text
+        x={isRight ? x + width - 6 : x + 6}
+        y={y + height / 2}
+        textAnchor={isRight ? "end" : "start"}
+        dominantBaseline="middle"
+        fill={textColor}
+        fontSize={12}
+        fontWeight={600}
+      >
+        {value}
+      </text>
+    );
+  };
+
   return (
     <div className="chart-card">
       <h3>Novedades</h3>
@@ -80,10 +126,13 @@ function NovedadesChart({ data }) {
             {chartData.map((entry, index) => (
               <Cell key={`pending-${index}`} fill={COLORS[entry.tipo] || "#ec9cea"} />
             ))}
-            <LabelList dataKey="pendientes" position="insideLeft" formatter={(val) => val} fill="#5a545a" />
+            <LabelList dataKey="pendientes" content={renderBarLabel} />
           </Bar>
-          <Bar dataKey="solucionados" name="Solucionados" fill="#92e485" radius={[0, 18, 18, 0]} barSize={22}>
-            <LabelList dataKey="solucionados" position="insideRight" formatter={(val) => val} fill="#0fa21e" />
+          <Bar dataKey="solucionados" name="Solucionados" radius={[0, 18, 18, 0]} barSize={22}>
+            {chartData.map((entry, index) => (
+              <Cell key={`solved-${index}`} fill={SOLVED_COLORS[entry.tipo] || "#5fbf5f"} />
+            ))}
+            <LabelList dataKey="solucionados" content={renderBarLabel} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
