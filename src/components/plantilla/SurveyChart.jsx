@@ -45,29 +45,70 @@ export default function SurveyChart({ data }) {
   
   console.log("✅ Todas las columnas:", columnasKeys);
   
-  // Filtrar solo columnas de preguntas (excluyendo Numero, Nombre, Fecha de creacion)
+  // Filtrar solo columnas de preguntas (excluyendo Número, Nombre, Fecha de creación, columnas vacías)
   const preguntasColumnas = columnasKeys.filter(
     (col) =>
-      !col.toLowerCase().includes("numero") &&
-      !col.toLowerCase().includes("nombre") &&
-      !col.toLowerCase().includes("fecha") &&
+      col &&
+      !/numero/i.test(col) &&
+      !/nombre/i.test(col) &&
+      !/fecha/i.test(col) &&
       col.trim() !== ""
   );
 
-  console.log("✅ Preguntas encontradas:", preguntasColumnas);
-  console.log("✅ Cantidad de preguntas:", preguntasColumnas.length);
+  console.log("✅ Columnas candidatas a preguntas:", preguntasColumnas);
+  console.log("✅ Cantidad de columnas candidatas:", preguntasColumnas.length);
 
-  // Mapear nombres de columnas más largos
-  const getNormalizedColumn = (row, keywords) => {
-    const keys = Object.keys(row);
-    for (const key of keys) {
-      const lowerKey = key.toLowerCase();
-      if (keywords.some((kw) => lowerKey.includes(kw.toLowerCase()))) {
-        return row[key];
-      }
-    }
-    return "";
+  const usedColumns = new Set();
+
+  const findColumnKey = (patterns) =>
+    columnasKeys.find(
+      (col) =>
+        !usedColumns.has(col) &&
+        patterns.some((pattern) => pattern.test(col))
+    );
+
+  const getNextUnusedColumn = () =>
+    preguntasColumnas.find((col) => !usedColumns.has(col));
+
+  const chooseColumnKey = (patterns, fallbackIndex) => {
+    const key = findColumnKey(patterns) || getNextUnusedColumn();
+    if (key) usedColumns.add(key);
+    return key;
   };
+
+  const pregunta1Key = chooseColumnKey([
+    /califica.*atenc/i,
+    /atenc.*califica/i,
+    /calific.*atenc/i,
+  ]);
+
+  const pregunta2Key = chooseColumnKey([
+    /fue claro.*proceso/i,
+    /claro.*proceso/i,
+    /direccion.*marca/i,
+    /direccionam.*marca/i,
+    /direccion.*garant/i,
+    /garant[ií]a.*direccion/i,
+  ]);
+
+  const pregunta3Key = chooseColumnKey([
+    /seguimiento/i,
+    /oportuno/i,
+    /realiz.*seguimiento/i,
+  ]);
+
+  const pregunta4Key = chooseColumnKey([
+    /califica.*soluci/i,
+    /soluci[oó]n/i,
+    /soluci.*califica/i,
+  ]);
+
+  const pregunta5Key = chooseColumnKey([
+    /volver[ií]a.*comprar/i,
+    /comprar.*nuevamente/i,
+    /volver.*comprar/i,
+    /volver.*a.*comprar/i,
+  ]);
 
   // Función para contar respuestas
   const contarRespuestas = (columnKey) => {
@@ -84,13 +125,6 @@ export default function SurveyChart({ data }) {
       value,
     }));
   };
-
-  // Procesar las preguntas según el índice
-  const pregunta1Key = preguntasColumnas[0]; // Califica la atencion
-  const pregunta2Key = preguntasColumnas[1]; // ¿Fue claro el proceso?
-  const pregunta3Key = preguntasColumnas[2]; // ¿Seguimiento oportuno?
-  const pregunta4Key = preguntasColumnas[3]; // Califica la solución
-  const pregunta5Key = preguntasColumnas[4]; // ¿Volvería a comprar?
 
   const pregunta1Data = contarRespuestas(pregunta1Key);
   const pregunta4Data = contarRespuestas(pregunta4Key);
