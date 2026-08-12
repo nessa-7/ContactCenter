@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseContactCenter } from "../utils/parseContactCenter";
 import "../App.css";
 
@@ -16,17 +16,122 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 import "../components/plantilla/Charts.css";
+import "../components/manager/Filters.css";
 import BrandReportChart from "../components/plantilla/BrandReportChart";
 import ProductDonutChart from "../components/plantilla/ProductDonutChart";
 import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
 import SurveyChart from "../components/plantilla/SurveyChart";
 
 function Reportes() {
-  const [data, setData] = useState(null);
+  const initialFilters = {
+    costo: "Todos",
+    marca: "Todos",
+    producto: "Todos",
+  };
 
+  const [data, setData] = useState(null);
+  const [filters, setFilters] = useState(initialFilters);
+  const [filteredBaseCasos, setFilteredBaseCasos] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const reportRef = useRef();
+
+  const normalizeKey = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const getCaseValue = (item, targetKeys) => {
+    const normalizedTargets = new Set(
+      targetKeys.map((key) => normalizeKey(key))
+    );
+
+    for (const key of Object.keys(item || {})) {
+      if (normalizedTargets.has(normalizeKey(key))) {
+        const value = item[key];
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+          return String(value).trim();
+        }
+      }
+    }
+
+    return "";
+  };
+
+  const getUniqueOptions = (items, keys) => {
+    const values = new Set();
+
+    (items || []).forEach((item) => {
+      const value = getCaseValue(item, keys);
+      if (value) values.add(value);
+    });
+
+    return [...values].sort((a, b) =>
+      String(a).localeCompare(String(b), "es", { sensitivity: "base" })
+    );
+  };
+
+  useEffect(() => {
+    if (!data?.baseCasos) {
+      setFilteredBaseCasos(null);
+      return;
+    }
+
+    const filtered = data.baseCasos.filter((item) => {
+      const valorCosto = getCaseValue(item, ["CCOSTO", "Costo", "COSTO"]);
+      const valorMarca = getCaseValue(item, ["MARCA", "Marca", "marca"]);
+      const valorProducto = getCaseValue(item, ["Producto", "PRODUCTO", "producto", "Producto/Servicio", "Tipo de producto"]);
+
+      if (
+        filters.costo !== "Todos" &&
+        String(valorCosto).toUpperCase() !== String(filters.costo).toUpperCase()
+      ) {
+        return false;
+      }
+
+      if (
+        filters.marca !== "Todos" &&
+        String(valorMarca).toUpperCase() !== String(filters.marca).toUpperCase()
+      ) {
+        return false;
+      }
+
+      if (
+        filters.producto !== "Todos" &&
+        String(valorProducto).toUpperCase() !== String(filters.producto).toUpperCase()
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    setFilteredBaseCasos(filtered);
+  }, [data, filters]);
+
+  const reportData = data
+    ? {
+        ...data,
+        baseCasos: filteredBaseCasos ?? data.baseCasos,
+      }
+    : null;
+
+  const costoOptions = getUniqueOptions(data?.baseCasos || [], ["CCOSTO", "Costo", "COSTO"]);
+  const marcaOptions = getUniqueOptions(data?.baseCasos || [], ["MARCA", "Marca", "marca"]);
+  const productoOptions = getUniqueOptions(data?.baseCasos || [], ["Producto", "PRODUCTO", "producto", "Producto/Servicio", "Tipo de producto"]);
+
+  const handleFilterChange = (event) => {
+    setFilters({
+      ...filters,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const clearFilters = () => {
+    setFilters(initialFilters);
+  };
 
   const exportPDF = async () => {
     if (!reportRef.current) return;
@@ -298,27 +403,95 @@ let actions = null;
       >
         {data && (
           <>
+            <div className="filters-card">
+              <div className="filter-title">
+                <h3>Filtros del reporte</h3>
+              </div>
+
+              <div className="filters-grid">
+                <div className="filter-item">
+                  <label>Costo</label>
+                  <select
+                    name="costo"
+                    value={filters.costo}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="Todos">Todos</option>
+                    {costoOptions.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-item">
+                  <label>Marca</label>
+                  <select
+                    name="marca"
+                    value={filters.marca}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="Todos">Todas</option>
+                    {marcaOptions.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-item">
+                  <label>Producto</label>
+                  <select
+                    name="producto"
+                    value={filters.producto}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="Todos">Todos</option>
+                    {productoOptions.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="clear-btn"
+                  onClick={clearFilters}
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+
             <div className="pdf-page pdf-page-1">
               <div className="top-grid">
-                <CasosPorDiasChart data={data} />
+                <CasosPorDiasChart data={reportData} />
               </div>
 
               <div className="top-grid">
-                <ResponseChart data={data} />
+                <ResponseChart data={reportData} />
               </div>
             </div>
 
             <div className="pdf-page pdf-page-2">
               <div className="top-grid">
-                <BrandReportChart data={data} />
+                <BrandReportChart data={reportData} />
               </div>
 
               <div className="top-grid">
-                <OrdenMarcaChart data={data} />
-                <ProductDonutChart data={data} />
+                <OrdenMarcaChart data={reportData} />
+                <ProductDonutChart data={reportData} />
               </div>
 
+              <br />
+              <br />
+
               <div className="top-grid">
+                
+                
                 <EnvioChart data={data} />
                 <NovedadesChart data={data} />
               </div>
