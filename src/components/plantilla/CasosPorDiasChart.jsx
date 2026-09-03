@@ -13,7 +13,6 @@ import {
 
 import "./Charts.css";
 import "./CasosPorDias.css";
-import "../manager/KPICards.css";
 import {
   FiCheckCircle,
   FiAlertTriangle,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { parseContactCenter } from "../utils/parseContactCenter";
+import { parseVentas } from "../utils/parseVentas";
 import "../App.css";
 
 import ContactKPICards from "../components/plantilla/ContactKPICards";
@@ -16,7 +17,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 import "../components/plantilla/Charts.css";
-import "../components/manager/Filters.css";
+import "../components/plantilla/Filters.css";
 import BrandReportChart from "../components/plantilla/BrandReportChart";
 import ProductDonutChart from "../components/plantilla/ProductDonutChart";
 import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
@@ -43,6 +44,7 @@ function Reportes() {
   const [filters, setFilters] = useState(initialFilters);
   const [filteredBaseCasos, setFilteredBaseCasos] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState({ casos: "", ventas: "", loading: "" });
 
   const reportRef = useRef();
 
@@ -50,6 +52,8 @@ function Reportes() {
     String(value || "")
       .trim()
       .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "")
       .replace(/[^a-z0-9]/g, "");
 
@@ -71,14 +75,17 @@ function Reportes() {
   };
 
   const getUniqueOptions = (items, keys) => {
-    const values = new Set();
+    const values = new Map();
 
     (items || []).forEach((item) => {
       const value = getCaseValue(item, keys);
-      if (value) values.add(value);
+      const normalizedValue = normalizeKey(value);
+      if (value && !values.has(normalizedValue)) {
+        values.set(normalizedValue, value);
+      }
     });
 
-    return [...values].sort((a, b) =>
+    return [...values.values()].sort((a, b) =>
       String(a).localeCompare(String(b), "es", { sensitivity: "base" })
     );
   };
@@ -125,6 +132,29 @@ function Reportes() {
     ? {
         ...data,
         baseCasos: filteredBaseCasos ?? data.baseCasos,
+        ventas: (data.ventas || []).filter((item) => {
+          const valorCodigoCosto = getCaseValue(item, ["CODIGOCCO", "CODIGO CCO"]);
+          const valorSede = getCaseValue(item, ["SEDE"]);
+          const valorMarca = getCaseValue(item, ["MARCA"]);
+          const valorProducto = getCaseValue(item, ["NOMBREPRO"]);
+          const costoSeleccionado = COSTO_OPTIONS.find((option) => option.value === filters.costo);
+          const normalizeCode = (value) => normalizeKey(value).replace(/0+$/, "");
+          const productoSeleccionado = normalizeKey(filters.producto);
+          const productoVenta = normalizeKey(valorProducto);
+          const productoCoincide = filters.producto === "Todos" ||
+            productoVenta.includes(productoSeleccionado) ||
+            productoSeleccionado.includes(productoVenta);
+          const costoCoincide = filters.costo === "Todos" || (
+            normalizeCode(valorCodigoCosto) === normalizeCode(filters.costo) ||
+            normalizeKey(valorSede) === normalizeKey(costoSeleccionado?.label.split(" - ")[1])
+          );
+
+          return (
+            costoCoincide &&
+            (filters.marca === "Todos" || normalizeKey(valorMarca) === normalizeKey(filters.marca)) &&
+            productoCoincide
+          );
+        }),
       }
     : null;
 
@@ -384,16 +414,35 @@ let actions = null;
 
     if (!file) return;
 
-    const excelData =
-      await parseContactCenter(file);
+    setUploadStatus((current) => ({ ...current, loading: "Cargando casos..." }));
+    try {
+      const excelData = await parseContactCenter(file);
+      setData((currentData) => ({ ...(currentData || {}), ...excelData }));
+      setUploadStatus((current) => ({ ...current, casos: `Casos cargados: ${excelData.baseCasos?.length || 0}`, loading: "" }));
+    } catch (error) {
+      setUploadStatus((current) => ({ ...current, casos: "Error al cargar casos", loading: "" }));
+    }
+  };
 
-    setData(excelData);
+  const handleSalesFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadStatus((current) => ({ ...current, loading: "Cargando ventas..." }));
+    try {
+      const ventas = await parseVentas(file);
+      setData((currentData) => ({ ...(currentData || {}), ventas }));
+      setUploadStatus((current) => ({ ...current, ventas: `Ventas cargadas: ${ventas.length}`, loading: "" }));
+    } catch (error) {
+      setUploadStatus((current) => ({ ...current, ventas: "Error al cargar ventas", loading: "" }));
+    }
   };
 
   return (
     <div className="app">
       <Header
         handleFile={handleFile}
+        handleSalesFile={handleSalesFile}
+        uploadStatus={uploadStatus}
         exportPDF={exportPDF}
       />
 

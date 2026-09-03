@@ -1,4 +1,4 @@
-import "../manager/Header.css";
+import "./Header.css";
 
 import {
   FiUpload,
@@ -9,7 +9,7 @@ import {
   MdHeadsetMic,
 } from "react-icons/md";
 
-export default function Header({ handleFile, exportPDF, showActions = true }) {
+export default function Header({ handleFile, handleSalesFile, uploadStatus, exportPDF, showActions = true }) {
   return (
     <header className="header">
 
@@ -25,7 +25,7 @@ export default function Header({ handleFile, exportPDF, showActions = true }) {
 
           <label className="upload-btn">
             <FiUpload />
-            <span>Seleccionar archivo</span>
+            <span>Casos Garantia</span>
 
             <input
               type="file"
@@ -34,6 +34,18 @@ export default function Header({ handleFile, exportPDF, showActions = true }) {
               hidden
             />
           </label>
+
+          <label className="upload-btn">
+            <FiUpload />
+            <span>Ventas</span>
+            <input type="file" accept=".xlsx,.xls" onChange={handleSalesFile} hidden />
+          </label>
+
+          <div className="upload-status" aria-live="polite">
+            {uploadStatus?.loading && <span className="upload-loading">{uploadStatus.loading}</span>}
+            {uploadStatus?.casos && <span>{uploadStatus.casos}</span>}
+            {uploadStatus?.ventas && <span>{uploadStatus.ventas}</span>}
+          </div>
 
           <button className="pdf-btn" onClick={exportPDF}>
             <FiDownload />

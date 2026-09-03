@@ -3,24 +3,7 @@
   
 }
 
-/* DASHBOARD */
-
-.dashboard {
-  width: 100%;
-  margin: auto;
-
-  padding: 35px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-
-
-  max-width: 1400px;
-  margin-left: 280px;
-  margin-right: 0px;
-}
-
+/* REPORTES */
 
 .reportes {
   width: 100%;
@@ -119,9 +102,6 @@
     font-size: 34px;
   }
 
-  .dashboard {
-    padding: 20px;
-  }
 }
 
 .product-chart {
