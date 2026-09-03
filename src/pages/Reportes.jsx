@@ -22,6 +22,16 @@ import ProductDonutChart from "../components/plantilla/ProductDonutChart";
 import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
 import SurveyChart from "../components/plantilla/SurveyChart";
 
+const COSTO_OPTIONS = [
+  { value: "10101", label: "10101 - Popayán" },
+  { value: "10201", label: "10201 - Bordo" },
+  { value: "10301", label: "10301 - Santander" },
+  { value: "10401", label: "10401 - Ambienta" },
+  { value: "20101", label: "20101 - Valle" },
+  { value: "30101", label: "30101 - Pasto" },
+  { value: "70101", label: "70101 - Pitalito" },
+];
+
 function Reportes() {
   const initialFilters = {
     costo: "Todos",
@@ -118,7 +128,6 @@ function Reportes() {
       }
     : null;
 
-  const costoOptions = getUniqueOptions(data?.baseCasos || [], ["CCOSTO", "Costo", "COSTO"]);
   const marcaOptions = getUniqueOptions(data?.baseCasos || [], ["MARCA", "Marca", "marca"]);
   const productoOptions = getUniqueOptions(data?.baseCasos || [], ["Producto", "PRODUCTO", "producto", "Producto/Servicio", "Tipo de producto"]);
 
@@ -417,9 +426,9 @@ let actions = null;
                     onChange={handleFilterChange}
                   >
                     <option value="Todos">Todos</option>
-                    {costoOptions.map((option, index) => (
-                      <option key={index} value={option}>
-                        {option}
+                    {COSTO_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
                       </option>
                     ))}
                   </select>
