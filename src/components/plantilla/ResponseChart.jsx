@@ -354,11 +354,63 @@ function ResponseChart({ data }) {
           />
 
           <Legend
-            verticalAlign="bottom"
-            wrapperStyle={{
-              paddingTop: "10px",
+  verticalAlign="bottom"
+  wrapperStyle={{
+    paddingTop: "10px",
+  }}
+  content={() => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: "15px",
+        flexWrap: "wrap",
+        paddingTop: "10px",
+      }}
+    >
+      {mesesConfig
+        .filter(
+          (mes) =>
+            mesSeleccionado === "Todos" ||
+            mes.key === mesSeleccionado
+        )
+        .filter((mes) =>
+          chartData.some(
+            (item) => item[mes.key] > 0
+          )
+        )
+        .map((mes) => (
+          <div
+            key={mes.key}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
             }}
-          />
+          >
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: mes.color,
+                display: "inline-block",
+              }}
+            />
+
+            <span
+              style={{
+                color: mes.color,
+                fontSize: "14px",
+              }}
+            >
+              {mes.key}
+            </span>
+          </div>
+        ))}
+    </div>
+  )}
+/>
 
           {mesesConfig
             .filter(
