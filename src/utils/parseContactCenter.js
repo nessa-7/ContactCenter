@@ -45,6 +45,16 @@ export const parseContactCenter = (file) => {
         );
       };
 
+      const hasValue = (value) =>
+        value !== undefined &&
+        value !== null &&
+        String(value).trim() !== "";
+
+      const hasCaseIdentity = (row) =>
+        hasValue(row["Nombre cliente"]) ||
+        hasValue(row["Cédula"]) ||
+        hasValue(row["Cedula"]);
+
 
       const contarDiasHabiles = (inicio, fin) => {
         let dias = 0;
@@ -82,7 +92,13 @@ export const parseContactCenter = (file) => {
         return dias;
       };
 
-      const baseCasos = getSheet("Base_Casos").map((row) => {
+      const baseCasos = getSheet("Base_Casos")
+        .filter(
+          (row) =>
+            hasValue(row["Fecha ingreso"]) &&
+            hasCaseIdentity(row)
+        )
+        .map((row) => {
         const fechaIngreso = row["Fecha ingreso"];
         const fechaFin = row["Fecha fin"];
 
@@ -122,7 +138,7 @@ export const parseContactCenter = (file) => {
 
           diasCierre,
         };
-      });
+        });
       console.log(baseCasos[0]);
 
       console.log(
