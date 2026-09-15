@@ -21,6 +21,8 @@ import "../components/plantilla/Filters.css";
 import BrandReportChart from "../components/plantilla/BrandReportChart";
 import ProductDonutChart from "../components/plantilla/ProductDonutChart";
 import OrdenMarcaChart from "../components/plantilla/OrdenMarcaChart";
+import OrdenEstadoChart from "../components/plantilla/OrdenEstadoChart";
+import PendingCasesChart from "../components/plantilla/PendingCasesChart";
 import SurveyChart from "../components/plantilla/SurveyChart";
 
 const COSTO_OPTIONS = [
@@ -541,15 +543,21 @@ let actions = null;
 
               <div className="top-grid">
                 <OrdenMarcaChart data={reportData} />
-                <ProductDonutChart data={reportData} />
+                <OrdenEstadoChart data={reportData} />
               </div>
 
               <br />
               <br />
 
               <div className="top-grid">
-                
-                
+                <ProductDonutChart data={reportData} />
+                <PendingCasesChart data={reportData} />
+              </div>
+
+              <br />
+              <br />
+
+              <div className="top-grid">
                 <EnvioChart data={data} />
                 <NovedadesChart data={data} />
               </div>

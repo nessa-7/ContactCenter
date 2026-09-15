@@ -28,32 +28,34 @@ function OrdenMarcaChart({ data }) {
     return key ? normalizeValue(caso[key]) : "";
   };
 
-  // Solo clientes que tienen teléfono
-  const clientesValidos =
-    data.baseCasos.filter((x) =>
-      String(x.Telefono || x.Teléfono || "").trim()
-    );
-
   const opciones = [
-    { name: "asesor", color: "#ffb875" },
-    { name: "auxiliar sc punto", color: "#e7df47" },
-    { name: "cliente", color: "#89d2ff" },
-    { name: "cliente no la comparte", color: "#ee6565" },
-    { name: "contact", color: "#83e144" },
+    { key: "autogestion", name: "autogestión del cliente", color: "#65bdf4" },
+    { key: "contact", name: "apoyo del contact", color: "#75d932" },
+    { key: "asesor", name: "apoyo de asesor", color: "#f3a154" },
+    { key: "auxiliar sc punto", name: "apoyo auxiliar servicio al cliente", color: "#e3da2d" },
+    { key: "ya no requiere el servicio", name: "ya no requiere el servicio", color: "#94989e" },
   ];
 
-  const chartData = opciones.map(({ name, color }) => ({
+  const getCategoria = (caso) => {
+    const generadaPor = getGeneradaPor(caso);
+
+    if (generadaPor === "cliente" || generadaPor === "cliente no la comparte") {
+      return "autogestion";
+    }
+
+    return generadaPor;
+  };
+
+  const chartData = opciones.map(({ key, name, color }) => ({
     name,
     color,
-    value: clientesValidos.filter(
-      (caso) => getGeneradaPor(caso) === name
-    ).length,
+    value: data.baseCasos.filter((caso) => getCategoria(caso) === key).length,
   }));
 
   return (
     <div className="chart-card">
       <h3>
-        Distribucion de generacion Orden de servicio
+        Distribución de generación de orden de servicio
       </h3>
 
       <ResponsiveContainer
