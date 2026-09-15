@@ -27,35 +27,35 @@ function NovedadesChart({ data }) {
 
   const noCompleto = left.filter((x) => matchAny(x, ["no completo", "no completo el flujo"]) ).length;
   const cedula = (left.filter((x) => matchAny(x, ["cedula", "cédula"]) ).length) + (right.filter((x) => matchAny(x, ["cedula", "cédula"]) ).length);
-  const manejadoMaria = (left.filter((x) => matchAny(x, ["maria elena", "manejado por maria elena"]) ).length) + (right.filter((x) => matchAny(x, ["maria elena", "manejado por maria elena"]) ).length);
-  const escalado = (left.filter((x) => matchAny(x, ["escalado a lina", "escalado a la lina"]) ).length) + (right.filter((x) => matchAny(x, ["escalado a lina", "escalado a la lina"]) ).length);
+  const cambioDevolucion = (left.filter((x) => matchAny(x, ["cambio", "devolucion", "devolución"]) ).length) + (right.filter((x) => matchAny(x, ["cambio", "devolucion", "devolución"]) ).length);
+  const pqr = (left.filter((x) => matchAny(x, ["pqr"]) ).length) + (right.filter((x) => matchAny(x, ["pqr"]) ).length);
   const garantia = right.length;
 
-  // Calcular solucionados (solo tabla izquierda)
-  const isSolved = (x) => {
+  // Calcular cerrados (solo tabla izquierda)
+  const isClosed = (x) => {
     const estado = normalize(x.estado || "");
-    const note = normalize(x.nota || "");
-    const obs = normalize(x.observacion || "");
-    return estado.includes("solucionado") || note.includes("solucionado") || obs.includes("solucionado");
+    const nota = normalize(x.nota || "");
+    const observacion = normalize(x.observacion || "");
+    return `${estado} ${nota} ${observacion}`.includes("cerrad");
   };
 
-  const noCompletoSol = left.filter((x) => matchAny(x, ["no completo", "no completo el flujo"]) && isSolved(x)).length;
-  const cedulaSol = left.filter((x) => matchAny(x, ["cedula", "cédula"]) && isSolved(x)).length;
-  const manejadoMariaSol = left.filter((x) => matchAny(x, ["maria elena", "manejado por maria elena"]) && isSolved(x)).length;
-  const escaladoSol = left.filter((x) => matchAny(x, ["escalado a lina", "escalado a la lina"]) && isSolved(x)).length;
+  const noCompletoSol = left.filter((x) => matchAny(x, ["no completo", "no completo el flujo"]) && isClosed(x)).length;
+  const cedulaSol = left.filter((x) => matchAny(x, ["cedula", "cédula"]) && isClosed(x)).length;
+  const cambioDevolucionSol = left.filter((x) => matchAny(x, ["cambio", "devolucion", "devolución"]) && isClosed(x)).length;
+  const pqrSol = left.filter((x) => matchAny(x, ["pqr"]) && isClosed(x)).length;
 
   const chartData = [
-    { tipo: "No completó flujo", total: noCompleto, solucionados: noCompletoSol, pendientes: Math.max(0, noCompleto - noCompletoSol) },
-    { tipo: "Cédula errónea", total: cedula, solucionados: cedulaSol, pendientes: Math.max(0, cedula - cedulaSol) },
-    { tipo: "Cambio/Devolución", total: manejadoMaria, solucionados: manejadoMariaSol, pendientes: Math.max(0, manejadoMaria - manejadoMariaSol) },
-    { tipo: "PQRS", total: escalado, solucionados: escaladoSol, pendientes: Math.max(0, escalado - escaladoSol) },
+    { tipo: "No completó flujo", total: noCompleto, cerrados: noCompletoSol, pendientes: Math.max(0, noCompleto - noCompletoSol) },
+    { tipo: "Cédula errónea", total: cedula, cerrados: cedulaSol, pendientes: Math.max(0, cedula - cedulaSol) },
+    { tipo: "Cambio/Devolución", total: cambioDevolucion, cerrados: cambioDevolucionSol, pendientes: Math.max(0, cambioDevolucion - cambioDevolucionSol) },
+    { tipo: "PQR", total: pqr, cerrados: pqrSol, pendientes: Math.max(0, pqr - pqrSol) },
   ];
 
   const COLORS = {
     "No completó flujo": "#87dae8",
     "Cédula errónea": "#b082d5",
     "Cambio/Devolución": "#efd054",
-    PQRS: "#dda05f",
+    PQR: "#dda05f",
   };
 
   const darkenColor = (hex, amount = 0.18) => {
@@ -78,7 +78,7 @@ function NovedadesChart({ data }) {
   };
 
   const SOLVED_COLORS = Object.fromEntries(
-    Object.entries(COLORS).map(([tipo, color]) => [tipo, darkenColor(color)])
+    Object.entries(COLORS).map(([tipo, color]) => [tipo, darkenColor(color, 0.35)] )
   );
 
   const renderBarLabel = ({ x, y, width, height, value, dataKey, payload }) => {
@@ -87,7 +87,7 @@ function NovedadesChart({ data }) {
       ? COLORS[entryType]
       : SOLVED_COLORS[entryType];
     const textColor = baseColor || (dataKey === "pendientes" ? "#2f2f2f7e" : "#26262698");
-    const isRight = dataKey === "solucionados";
+    const isRight = dataKey === "cerrados";
 
     return (
       <text
@@ -101,6 +101,20 @@ function NovedadesChart({ data }) {
       >
         {value}
       </text>
+    );
+  };
+
+  const renderTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+
+    const values = payload[0].payload;
+
+    return (
+      <div style={{ background: "#fff", border: "1px solid #d1d5db", padding: "8px 10px", color: "#374151" }}>
+        <div style={{ marginBottom: 6 }}>{label}</div>
+        <div style={{ color: COLORS[label] || "#87dae8" }}>Pendientes: {values.pendientes}</div>
+        <div style={{ color: SOLVED_COLORS[label] || "#4f8ca0" }}>Cerrados: {values.cerrados}</div>
+      </div>
     );
   };
 
@@ -119,20 +133,33 @@ function NovedadesChart({ data }) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
           <YAxis dataKey="tipo" type="category" width={160} />
-          <Tooltip />
-          <Legend />
+          <Tooltip content={renderTooltip} />
+          <Legend
+            content={() => (
+              <div style={{ display: "flex", justifyContent: "center", gap: 18, paddingTop: 8 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 14, height: 14, backgroundColor: "#93d5e0", display: "inline-block" }} />
+                  Pendientes
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 14, height: 14, backgroundColor: "#4f8ca0", display: "inline-block" }} />
+                  Cerrados
+                </span>
+              </div>
+            )}
+          />
 
-          <Bar dataKey="pendientes" name="Pendientes" radius={[0, 18, 18, 0]} barSize={22}>
+          <Bar dataKey="pendientes" name="Pendientes" fill="#a2e2ed" radius={[0, 18, 18, 0]} barSize={18}>
             {chartData.map((entry, index) => (
               <Cell key={`pending-${index}`} fill={COLORS[entry.tipo] || "#ec9cea"} />
             ))}
             <LabelList dataKey="pendientes" content={renderBarLabel} />
           </Bar>
-          <Bar dataKey="solucionados" name="Solucionados" radius={[0, 18, 18, 0]} barSize={22}>
+          <Bar dataKey="cerrados" name="Cerrados" fill="#4b5563" radius={[0, 18, 18, 0]} barSize={18}>
             {chartData.map((entry, index) => (
               <Cell key={`solved-${index}`} fill={SOLVED_COLORS[entry.tipo] || "#5fbf5f"} />
             ))}
-            <LabelList dataKey="solucionados" content={renderBarLabel} />
+            <LabelList dataKey="cerrados" content={renderBarLabel} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

@@ -26,30 +26,30 @@ function EnvioChart({ data }) {
   const cedulaRight = right.filter((x) => matchAny(x, ["cedula", "cédula"]) ).length;
   const cedulaErronea = cedulaLeft + cedulaRight;
 
-  const manejadoMariaLeft = left.filter((x) => matchAny(x, ["maria elena", "manejado por maria elena"]) ).length;
-  const manejadoMariaRight = right.filter((x) => matchAny(x, ["maria elena", "manejado por maria elena"]) ).length;
-  const manejadoMaria = manejadoMariaLeft + manejadoMariaRight;
+  const cambioDevolucionLeft = left.filter((x) => matchAny(x, ["cambio", "devolucion", "devolución"]) ).length;
+  const cambioDevolucionRight = right.filter((x) => matchAny(x, ["cambio", "devolucion", "devolución"]) ).length;
+  const cambioDevolucion = cambioDevolucionLeft + cambioDevolucionRight;
 
-  const escaladoLeft = left.filter((x) => matchAny(x, ["escalado a lina", "escalado a la lina"]) ).length;
-  const escaladoRight = right.filter((x) => matchAny(x, ["escalado a lina", "escalado a la lina"]) ).length;
-  const escalado = escaladoLeft + escaladoRight;
+  const pqrLeft = left.filter((x) => matchAny(x, ["pqr"]) ).length;
+  const pqrRight = right.filter((x) => matchAny(x, ["pqr"]) ).length;
+  const pqr = pqrLeft + pqrRight;
 
   const fueraGarantia = right.length || 0;
 
   const chartData = [
     { name: "No Completó Flujo", value: noCompleto },
     { name: "Cédula Errónea", value: cedulaErronea },
-    { name: "Cambio/Devolución", value: manejadoMaria },
-    { name: "PQRS", value: escalado },
+    { name: "Cambio/Devolución", value: cambioDevolucion },
+    { name: "PQR", value: pqr },
     { name: "Fuera Garantía", value: fueraGarantia },
   ];
 
-  // Calcular solucionados excluyendo 'fuera garantia' (tomando solo registros de la tabla izquierda)
+  // Calcular cerrados excluyendo 'fuera garantia' (tomando solo registros de la tabla izquierda)
   const isSolved = (x) => {
     const estado = normalize(x.estado || "");
     const note = normalize(x.nota || "");
     const obs = normalize(x.observacion || "");
-    return estado.includes("solucionado") || note.includes("solucionado") || obs.includes("solucionado");
+    return estado.includes("cerrado") || note.includes("cerrado") || obs.includes("cerrado");
   };
 
   const combinedExclFuera = left.slice();
@@ -79,7 +79,7 @@ function EnvioChart({ data }) {
       </ResponsiveContainer>
       <div style={{marginTop:12, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
         <div>
-          <strong>Total (excluye Fuera garantía):</strong> {totalExclFuera}
+          <strong>Total Novedades:</strong> {totalExclFuera} (no incluye "Fuera Garantía")
         </div>
         {/*}
         <div>

@@ -23,7 +23,7 @@ function ContactKPICards({ data }) {
       String(x.estado)
         .trim()
         .toLowerCase() ===
-      "solucionado"
+      "cerrado"
   ).length;
 
   const pendientes =

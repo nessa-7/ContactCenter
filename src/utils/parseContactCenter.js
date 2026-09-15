@@ -226,6 +226,10 @@ export const parseContactCenter = (file) => {
           const row =
             novedadesRaw[i];
 
+          const estado = row.find(
+            (value) => /cerrad/i.test(String(value || ""))
+          ) || row[7] || "";
+
           // TABLA IZQUIERDA
 
           if (row[4]) {
@@ -244,7 +248,7 @@ export const parseContactCenter = (file) => {
                 row[5],
               nota:
                 row[6],
-              estado: row[7],
+              estado,
             });
           }
 
