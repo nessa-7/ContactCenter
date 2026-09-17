@@ -41,8 +41,8 @@ function OrdenEstadoChart({ data }) {
 
     const labels = {
       contact: "Apoyo del contact",
-      asesor: "Apoyo de asesor",
-      "auxiliar sc punto": "Apoyo auxiliar servicio al cliente",
+      asesor: "personal de punto",
+      "auxiliar sc punto": "personal de punto",
       "ya no requiere el servicio": "Ya no requiere el servicio",
     };
 
@@ -52,8 +52,7 @@ function OrdenEstadoChart({ data }) {
   const categories = [
     { name: "Autogestión del cliente", color: "#89d2ff" },
     { name: "Apoyo del contact", color: "#83e144" },
-    { name: "Apoyo de asesor", color: "#ffb875" },
-    { name: "Apoyo auxiliar servicio al cliente", color: "#e7df47" },
+    { name: "Personal de punto", color: "#ffb875" },
   ];
 
   const darkenColor = (hex, amount = 0.3) => {

@@ -31,8 +31,7 @@ function OrdenMarcaChart({ data }) {
   const opciones = [
     { key: "autogestion", name: "autogestión del cliente", color: "#65bdf4" },
     { key: "contact", name: "apoyo del contact", color: "#75d932" },
-    { key: "asesor", name: "apoyo de asesor", color: "#f3a154" },
-    { key: "auxiliar sc punto", name: "apoyo auxiliar servicio al cliente", color: "#e3da2d" },
+    { key: "personal de punto", name: "personal de punto", color: "#f3a154" },
     { key: "ya no requiere el servicio", name: "ya no requiere el servicio", color: "#94989e" },
   ];
 
@@ -41,6 +40,10 @@ function OrdenMarcaChart({ data }) {
 
     if (generadaPor === "cliente" || generadaPor === "cliente no la comparte") {
       return "autogestion";
+    }
+
+    if (generadaPor === "asesor" || generadaPor === "auxiliar sc punto") {
+      return "personal de punto";
     }
 
     return generadaPor;
