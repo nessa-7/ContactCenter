@@ -41,8 +41,8 @@ function OrdenEstadoChart({ data }) {
 
     const labels = {
       contact: "Apoyo del contact",
-      asesor: "personal de punto",
-      "auxiliar sc punto": "personal de punto",
+      asesor: "Personal de punto",
+      "auxiliar sc punto": "Personal de punto",
       "ya no requiere el servicio": "Ya no requiere el servicio",
     };
 
